@@ -53,7 +53,7 @@ Estado: `não iniciado` · `em curso` · `concluído` (relatório em `docs/spike
 
 | Spike | Tema | Estado | Relatório | Bloqueia |
 |---|---|---|---|---|
-| S7 | Hardening do runtime | não iniciado | — | F0 (gate de hash), F4 |
+| S7 | Hardening do runtime | concluído | `docs/spikes/S7-hardening-runtime.md` | F0 (gate de hash), F4 |
 | S5 | LLM (modelo, quantização, delegação, persona) | não iniciado | — | F4; medições de visão para F6c |
 | S1 | STT pt-BR | não iniciado | — | F5 |
 | S2 | TTS e RVC | não iniciado | — | F5 |
