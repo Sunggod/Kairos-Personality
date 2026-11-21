@@ -5,12 +5,14 @@ import { z } from "zod";
 import {
   affectStateSchema,
   autoWriteSchema,
+  delegationEntrySchema,
   lockedWriteSchema,
   memoryRecordSchema,
   parseVectorFile,
   personaLayersSchema,
   runVector,
   vectorsFromFile,
+  workingFrameSchema,
   type VectorWithSchema,
 } from "../src";
 
@@ -20,6 +22,8 @@ const vectorSchemas: Record<string, z.ZodType> = {
   "locked-write": lockedWriteSchema,
   "affect-state": affectStateSchema,
   "memory-record": memoryRecordSchema,
+  "working-frame": workingFrameSchema,
+  "delegation-entry": delegationEntrySchema,
 };
 
 const vectorsDir = fileURLToPath(new URL("../vectors/", import.meta.url));

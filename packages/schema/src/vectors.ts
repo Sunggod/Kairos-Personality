@@ -50,6 +50,19 @@ export function rejectionReason(error: z.ZodError): string {
     }
   }
 
+  const pathFallbacks: ReadonlyArray<readonly [string, string]> = [
+    ["trace", "trace_required"],
+  ];
+
+  for (const issue of error.issues) {
+    const path = issue.path.join(".");
+    for (const [fragment, code] of pathFallbacks) {
+      if (path === fragment || path.endsWith("." + fragment)) {
+        return code;
+      }
+    }
+  }
+
   return "schema_rejection";
 }
 

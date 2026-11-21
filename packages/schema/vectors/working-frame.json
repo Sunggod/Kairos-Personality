@@ -1,0 +1,86 @@
+{
+  "schema": "working-frame",
+  "vectors": [
+    {
+      "id": "working-valido",
+      "input": {
+        "schemaVersion": 1,
+        "trace": "trace-exemplo-01",
+        "root": {
+          "id": "frame-root-01",
+          "kind": "interactive",
+          "trace": "trace-exemplo-01",
+          "startedAt": "2026-11-21T12:00:00Z"
+        },
+        "tasks": [
+          {
+            "id": "frame-task-01",
+            "kind": "task",
+            "trace": "trace-exemplo-01",
+            "state": "running",
+            "flow": "two-step",
+            "origin": "user",
+            "startedAt": "2026-11-21T12:00:01Z",
+            "pending": true,
+            "lastReport": { "outcome": "partial", "caveats": ["etapa pendente"] }
+          }
+        ]
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "working-sem-trace",
+      "input": {
+        "schemaVersion": 1,
+        "root": {
+          "id": "frame-root-01",
+          "kind": "interactive",
+          "trace": "trace-exemplo-01",
+          "startedAt": "2026-11-21T12:00:00Z"
+        },
+        "tasks": []
+      },
+      "expect": { "ok": false, "reject": "trace_required", "path": "trace" }
+    },
+    {
+      "id": "working-estado-invalido",
+      "input": {
+        "schemaVersion": 1,
+        "trace": "trace-exemplo-02",
+        "root": {
+          "id": "frame-root-02",
+          "kind": "interactive",
+          "trace": "trace-exemplo-02",
+          "startedAt": "2026-11-21T12:00:00Z"
+        },
+        "tasks": [
+          {
+            "id": "frame-task-02",
+            "kind": "task",
+            "trace": "trace-exemplo-02",
+            "state": "concluido",
+            "flow": "two-step",
+            "origin": "user",
+            "startedAt": "2026-11-21T12:00:01Z",
+            "pending": false
+          }
+        ]
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "tasks.0.state" }
+    },
+    {
+      "id": "working-sem-schema-version",
+      "input": {
+        "trace": "trace-exemplo-03",
+        "root": {
+          "id": "frame-root-03",
+          "kind": "interactive",
+          "trace": "trace-exemplo-03",
+          "startedAt": "2026-11-21T12:00:00Z"
+        },
+        "tasks": []
+      },
+      "expect": { "ok": false, "reject": "schema_version", "path": "schemaVersion" }
+    }
+  ]
+}

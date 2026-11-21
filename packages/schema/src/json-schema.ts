@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { affectStateSchema } from "./affect";
+import {
+  delegationEntrySchema,
+  delegationsFileSchema,
+} from "./delegation";
 import { memoryRecordSchema } from "./memory";
 import {
   autoWriteSchema,
@@ -7,6 +11,7 @@ import {
   personaLayersSchema,
 } from "./persona";
 import { modelsLockSchema, runtimeLockSchema } from "./pins";
+import { workingFrameSchema } from "./working";
 
 const draft = "https://json-schema.org/draft/2020-12/schema" as const;
 
@@ -58,6 +63,21 @@ export const jsonSchemas = {
     memoryRecordSchema,
     "Kairos Personality Memory Record",
     "https://kairos-personality.local/schema/memory-record.json",
+  ),
+  "working-frame": toSchema(
+    workingFrameSchema,
+    "Kairos Personality Working Frame",
+    "https://kairos-personality.local/schema/working-frame.json",
+  ),
+  "delegation-entry": toSchema(
+    delegationEntrySchema,
+    "Kairos Personality Delegation Entry",
+    "https://kairos-personality.local/schema/delegation-entry.json",
+  ),
+  "delegations-file": toSchema(
+    delegationsFileSchema,
+    "Kairos Personality Delegations File",
+    "https://kairos-personality.local/schema/delegations-file.json",
   ),
 } as const;
 

@@ -8,7 +8,10 @@ export const schemaVersionSchema = z.literal(SCHEMA_VERSION, {
 
 export const idSchema = z.string().min(1).max(256);
 
-export const traceSchema = z.string().min(1).max(256);
+export const traceSchema = z
+  .string()
+  .min(1, { error: "trace_required: trace obrigatoria por turno (P9)" })
+  .max(256);
 
 export const isoDateTimeSchema = z.iso.datetime();
 

@@ -1,0 +1,90 @@
+{
+  "schema": "delegation-entry",
+  "vectors": [
+    {
+      "id": "delegacao-open-valida",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "two-step",
+        "description": "Executa duas etapas encadeadas e devolve o resultado agregado.",
+        "risk": "none",
+        "tier": "open",
+        "lang": "pt-BR",
+        "slots": {
+          "type": "object",
+          "properties": { "objective": { "type": "string", "minLength": 1 } },
+          "required": ["objective"],
+          "additionalProperties": false
+        }
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "delegacao-sensitive-valida",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "pagamento-exemplo",
+        "description": "Exemplo sintetico de acao irreversivel.",
+        "risk": "irreversible",
+        "tier": "sensitive",
+        "lang": "pt-BR",
+        "slots": {
+          "type": "object",
+          "properties": { "destino": { "type": "string" } },
+          "required": ["destino"]
+        }
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "delegacao-sem-tier",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "two-step",
+        "description": "Fluxo sem tier.",
+        "risk": "none",
+        "lang": "pt-BR",
+        "slots": { "type": "object", "properties": {} }
+      },
+      "expect": { "ok": false, "reject": "tier_required", "path": "tier" }
+    },
+    {
+      "id": "delegacao-sensitive-sem-slots",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "pagamento-exemplo",
+        "description": "Exemplo sintetico sem slots.",
+        "risk": "irreversible",
+        "tier": "sensitive",
+        "lang": "pt-BR"
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "slots" }
+    },
+    {
+      "id": "delegacao-risk-invalido",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "two-step",
+        "description": "Fluxo com risco inventado.",
+        "risk": "alto",
+        "tier": "open",
+        "lang": "pt-BR",
+        "slots": { "type": "object", "properties": {} }
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "risk" }
+    },
+    {
+      "id": "delegacao-lang-invalido",
+      "input": {
+        "schemaVersion": 1,
+        "flow": "two-step",
+        "description": "Fluxo com idioma inventado.",
+        "risk": "none",
+        "tier": "open",
+        "lang": "portugues",
+        "slots": { "type": "object", "properties": {} }
+      },
+      "expect": { "ok": false, "reject": "lang_invalido", "path": "lang" }
+    }
+  ]
+}
