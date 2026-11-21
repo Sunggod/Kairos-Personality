@@ -186,8 +186,10 @@ data/  secrets/  models/ locais, fora do git
 ```
 
 `packages/schema` não depende de nada com runtime: é o que deixa outro componente (ou outra
-linguagem) ler os tipos e os vetores sem trazer o núcleo junto. Onde moram `persona.seed.json`,
-`delegations.json` e os `*.lock.json` é decidido na F0/F1 e registrado aqui quando existir.
+linguagem) ler os tipos e os vetores sem trazer o núcleo junto. **Decidido na F0/F1:** os
+`*.lock.json` ficam na raiz; `persona.seed.json` e `delegations.json` em
+`packages/schema/data/` (dado versionado, sem runtime); JSON Schema gerado em
+`packages/schema/generated/` e vetores em `packages/schema/vectors/`.
 
 ---
 
