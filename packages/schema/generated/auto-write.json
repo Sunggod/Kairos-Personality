@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "identity"
+        },
+        "value": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "language": {
+              "type": "string",
+              "minLength": 2
+            },
+            "tone": {
+              "type": "string",
+              "minLength": 1
+            },
+            "self_intro": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "name",
+            "language",
+            "tone",
+            "self_intro"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "layer",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "style"
+        },
+        "value": {
+          "type": "object",
+          "properties": {
+            "slang": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "humor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "sarcasm": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "drama": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "profanity": {
+              "type": "string",
+              "enum": [
+                "livre",
+                "moderado",
+                "nenhum"
+              ]
+            },
+            "task_verbosity": {
+              "type": "string",
+              "enum": [
+                "curta",
+                "media",
+                "longa"
+              ]
+            },
+            "verbosity": {
+              "type": "string",
+              "enum": [
+                "curta",
+                "media",
+                "longa"
+              ]
+            },
+            "formality": {
+              "type": "string",
+              "enum": [
+                "baixa",
+                "media",
+                "alta"
+              ]
+            },
+            "proactivity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "slang",
+            "humor",
+            "sarcasm",
+            "drama",
+            "profanity",
+            "task_verbosity",
+            "verbosity",
+            "formality",
+            "proactivity"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "layer",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "lexicon"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "term": {
+                "type": "string",
+                "minLength": 1
+              },
+              "meaning": {
+                "type": "string",
+                "minLength": 1
+              },
+              "register": {
+                "type": "string",
+                "minLength": 1
+              },
+              "example": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provenance": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "term",
+              "meaning",
+              "register",
+              "example",
+              "provenance"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "layer",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "goals"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "priority": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "id",
+              "description",
+              "priority"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "layer",
+        "value"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$id": "https://kairos-personality.local/schema/auto-write.json",
+  "title": "Kairos Personality Auto Write"
+}

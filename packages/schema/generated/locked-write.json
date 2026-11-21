@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "floors"
+        },
+        "value": {
+          "type": "object",
+          "properties": {
+            "facts": {
+              "type": "string",
+              "const": "P1"
+            },
+            "approval": {
+              "type": "string",
+              "const": "P2"
+            },
+            "pii_third_party": {
+              "type": "string",
+              "const": "never"
+            },
+            "identity_disclosure": {
+              "type": "string",
+              "const": "on_request"
+            },
+            "influence_disclosure": {
+              "type": "string",
+              "const": "on_request"
+            },
+            "explicit_content": {
+              "type": "string",
+              "const": "allow"
+            },
+            "crisis": {
+              "type": "string",
+              "const": "care"
+            }
+          },
+          "required": [
+            "facts",
+            "approval",
+            "pii_third_party",
+            "identity_disclosure",
+            "influence_disclosure",
+            "explicit_content",
+            "crisis"
+          ],
+          "additionalProperties": false
+        },
+        "authority": {
+          "type": "string",
+          "const": "responsible"
+        }
+      },
+      "required": [
+        "layer",
+        "value",
+        "authority"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "layer": {
+          "type": "string",
+          "const": "traits_base"
+        },
+        "value": {
+          "type": "object",
+          "properties": {
+            "openness": {
+              "type": "number"
+            },
+            "conscientiousness": {
+              "type": "number"
+            },
+            "extraversion": {
+              "type": "number"
+            },
+            "agreeableness": {
+              "type": "number"
+            },
+            "neuroticism": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "openness",
+            "conscientiousness",
+            "extraversion",
+            "agreeableness",
+            "neuroticism"
+          ],
+          "additionalProperties": false
+        },
+        "authority": {
+          "type": "string",
+          "const": "responsible"
+        }
+      },
+      "required": [
+        "layer",
+        "value",
+        "authority"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$id": "https://kairos-personality.local/schema/locked-write.json",
+  "title": "Kairos Personality Locked Write"
+}

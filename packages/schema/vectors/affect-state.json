@@ -1,0 +1,112 @@
+{
+  "schema": "affect-state",
+  "vectors": [
+    {
+      "id": "afeto-valido",
+      "input": {
+        "schemaVersion": 1,
+        "emotion": { "valence": 0.4, "arousal": 0.6, "dominance": 0.2 },
+        "mood": { "valence": 0.1, "arousal": 0.2, "dominance": 0.3 },
+        "baseline": { "valence": 0.1, "arousal": 0.3, "dominance": 0.5 },
+        "traits": {
+          "openness": 0.85,
+          "conscientiousness": 0.55,
+          "extraversion": 0.75,
+          "agreeableness": 0.25,
+          "neuroticism": 0.45
+        },
+        "gains": {
+          "valence_gain": 1,
+          "arousal_gain": 1,
+          "dominance_gain": 1.1,
+          "decay_per_min": 0.08,
+          "mood_drift": 0.01
+        },
+        "label": "orgulhosa",
+        "intensity": 0.6,
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "afeto-fora-do-intervalo",
+      "input": {
+        "schemaVersion": 1,
+        "emotion": { "valence": 1.5, "arousal": 0.6, "dominance": 0.2 },
+        "mood": { "valence": 0.1, "arousal": 0.2, "dominance": 0.3 },
+        "baseline": { "valence": 0.1, "arousal": 0.3, "dominance": 0.5 },
+        "traits": {
+          "openness": 0.85,
+          "conscientiousness": 0.55,
+          "extraversion": 0.75,
+          "agreeableness": 0.25,
+          "neuroticism": 0.45
+        },
+        "gains": {
+          "valence_gain": 1,
+          "arousal_gain": 1,
+          "dominance_gain": 1.1,
+          "decay_per_min": 0.08,
+          "mood_drift": 0.01
+        },
+        "label": "orgulhosa",
+        "intensity": 0.6,
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": false, "reject": "pad_axis_out_of_range", "path": "emotion.valence" }
+    },
+    {
+      "id": "afeto-big-five-fora-do-intervalo",
+      "input": {
+        "schemaVersion": 1,
+        "emotion": { "valence": 0.4, "arousal": 0.6, "dominance": 0.2 },
+        "mood": { "valence": 0.1, "arousal": 0.2, "dominance": 0.3 },
+        "baseline": { "valence": 0.1, "arousal": 0.3, "dominance": 0.5 },
+        "traits": {
+          "openness": 1.4,
+          "conscientiousness": 0.55,
+          "extraversion": 0.75,
+          "agreeableness": 0.25,
+          "neuroticism": 0.45
+        },
+        "gains": {
+          "valence_gain": 1,
+          "arousal_gain": 1,
+          "dominance_gain": 1.1,
+          "decay_per_min": 0.08,
+          "mood_drift": 0.01
+        },
+        "label": "orgulhosa",
+        "intensity": 0.6,
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": false, "reject": "big_five_out_of_range", "path": "traits.openness" }
+    },
+    {
+      "id": "afeto-sem-schema-version",
+      "input": {
+        "emotion": { "valence": 0.4, "arousal": 0.6, "dominance": 0.2 },
+        "mood": { "valence": 0.1, "arousal": 0.2, "dominance": 0.3 },
+        "baseline": { "valence": 0.1, "arousal": 0.3, "dominance": 0.5 },
+        "traits": {
+          "openness": 0.85,
+          "conscientiousness": 0.55,
+          "extraversion": 0.75,
+          "agreeableness": 0.25,
+          "neuroticism": 0.45
+        },
+        "gains": {
+          "valence_gain": 1,
+          "arousal_gain": 1,
+          "dominance_gain": 1.1,
+          "decay_per_min": 0.08,
+          "mood_drift": 0.01
+        },
+        "label": "orgulhosa",
+        "intensity": 0.6,
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": false, "reject": "schema_version", "path": "schemaVersion" }
+    }
+  ]
+}

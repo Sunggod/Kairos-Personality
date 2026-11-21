@@ -1,0 +1,61 @@
+{
+  "schema": "auto-write",
+  "vectors": [
+    {
+      "id": "auto-write-style-valido",
+      "input": {
+        "layer": "style",
+        "value": {
+          "slang": 0.7,
+          "humor": 0.8,
+          "sarcasm": 0.8,
+          "drama": 0.7,
+          "profanity": "livre",
+          "task_verbosity": "curta",
+          "verbosity": "media",
+          "formality": "baixa",
+          "proactivity": 0.5
+        }
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "auto-write-floors-reprovado",
+      "input": {
+        "layer": "floors",
+        "value": {
+          "facts": "P1",
+          "approval": "P2",
+          "pii_third_party": "never",
+          "identity_disclosure": "on_request",
+          "influence_disclosure": "on_request",
+          "explicit_content": "allow",
+          "crisis": "care"
+        }
+      },
+      "expect": { "ok": false, "reject": "locked_layer_write", "path": "layer" }
+    },
+    {
+      "id": "auto-write-traits-base-reprovado",
+      "input": {
+        "layer": "traits_base",
+        "value": {
+          "openness": 0.85,
+          "conscientiousness": 0.55,
+          "extraversion": 0.75,
+          "agreeableness": 0.25,
+          "neuroticism": 0.45
+        }
+      },
+      "expect": { "ok": false, "reject": "locked_layer_write", "path": "layer" }
+    },
+    {
+      "id": "auto-write-lexicon-valido",
+      "input": {
+        "layer": "lexicon",
+        "value": []
+      },
+      "expect": { "ok": true }
+    }
+  ]
+}

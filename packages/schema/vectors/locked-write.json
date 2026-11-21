@@ -1,0 +1,38 @@
+{
+  "schema": "locked-write",
+  "vectors": [
+    {
+      "id": "locked-write-flores-valido",
+      "input": {
+        "layer": "floors",
+        "authority": "responsible",
+        "value": {
+          "facts": "P1",
+          "approval": "P2",
+          "pii_third_party": "never",
+          "identity_disclosure": "on_request",
+          "influence_disclosure": "on_request",
+          "explicit_content": "allow",
+          "crisis": "care"
+        }
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "locked-write-sem-autoridade",
+      "input": {
+        "layer": "floors",
+        "value": {
+          "facts": "P1",
+          "approval": "P2",
+          "pii_third_party": "never",
+          "identity_disclosure": "on_request",
+          "influence_disclosure": "on_request",
+          "explicit_content": "allow",
+          "crisis": "care"
+        }
+      },
+      "expect": { "ok": false, "reject": "locked_authority_required", "path": "authority" }
+    }
+  ]
+}
