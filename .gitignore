@@ -1,0 +1,25 @@
+# Dados locais do usuario, segredos e modelos (AGENTS.md, regra 9; P7, P10)
+data/
+secrets/
+models/*.gguf
+models/*.safetensors
+*.local
+.env
+.env.*
+
+# Dependencias e artefatos de build
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Logs e temporarios
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Dados brutos de medicao grandes podem ser versionados em docs/spikes/data/;
+# so ignore o que for local de maquina
+*.trace.local
