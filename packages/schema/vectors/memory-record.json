@@ -423,7 +423,7 @@
       "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
     },
     {
-      "id": "memoria-m2-id-dez-digitos-benigno",
+      "id": "memoria-m2-id-oito-digitos-benigno",
       "input": {
         "schemaVersion": 1,
         "id": "mem-p2-exemplo-33",
@@ -431,7 +431,111 @@
         "kind": "content",
         "origin": "user",
         "createdAt": "2026-11-21T10:00:00Z",
-        "content": "Numeros de exemplo 1234567890"
+        "content": "Numeros de exemplo 12345678"
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "memoria-m3-telefone-fixo-colado",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-34",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Telefone: 1133445566"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-report-escapado",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-35",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "{\\\"outcome\\\":\\\"succeeded\\\",\\\"caveats\\\":[]}"
+      },
+      "expect": { "ok": false, "reject": "raw_report", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-chave-secreta-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-36",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "a chave secreta é abc123"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-segredo-da-conta-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-37",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "o segredo da conta é abc123"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-chave-api-secreta-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-38",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "a chave da API secreta é abc123"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-cpf-com-parenteses",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-39",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Documento: 123(456)789-09."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-path-diretorio-sem-barra",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-40",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em /tmp"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m2-letra-com-dois-pontos-benigna",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-41",
+        "tier": "M2",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "a: prefiro cafe"
       },
       "expect": { "ok": true }
     }

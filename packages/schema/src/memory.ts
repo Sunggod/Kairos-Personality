@@ -27,49 +27,49 @@ const HOMOGLYPHS: Readonly<Record<string, string>> = {
 };
 
 export function sensitiveContentCode(content: string): string | null {
-  // NFKC resolve fullwidth; o mapa resolve homóglifos cirílicos/gregos; os
-  // traços Unicode viram '-'. `flat` remove espaços para separadores gráficos.
+  // Normalização estrutural: NFKC (fullwidth), homóglifos e traços Unicode.
   const normalized = content
     .normalize("NFKC")
     .replace(/[\u2010-\u2015\u2212]/g, "-")
     .replace(/[аеорсіјѕумктбнгхοαερικντχ]/g, (char) => HOMOGLYPHS[char] ?? char);
   const flat = normalized.replace(/\s+/g, "");
+  const digits = normalized.replace(/\D/g, "");
 
-  const piiPatterns: ReadonlyArray<RegExp> = [
-    // E-mail estrutural: pega qualquer alfabeto depois da normalização.
-    /[^\s@]+@[^\s@]+\.[^\s@]{2,}/u,
-    // CPF: colado, pontuado, com espaços ou com traços em qualquer posição.
-    /\b\d{3}[.-]?\d{3}[.-]?\d{3}[.-]?\d{2}\b/,
-    // Telefone: exige +55, DDD entre parênteses, separador explícito ou 11 dígitos com 9.
-    /\+55\d{2}\d{4,5}[.-]?\d{4}/,
-    /\(\d{2}\)\d{4,5}[.-]?\d{4}/,
-    /\b\d{2}[.-]\d{4,5}[.-]?\d{4}\b/,
-    /\b\d{2}9\d{8}\b/,
-  ];
-
-  for (const pattern of piiPatterns) {
-    if (pattern.test(flat)) {
-      return "third_party_pii";
-    }
-  }
-
-  const secretPattern =
-    /\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}|\b(?:senha|password|passwd|secret|segredo|chave|token|api[_-]?key|api\s+key)\b(?:\s+(?:de|da|do|api|key)){0,2}\s*(?:[:=]|é|eh|e|seria|será|seja)\s*\S+/i;
-
-  if (secretPattern.test(normalized)) {
+  // 1. Token ou credencial em prosa. Vem primeiro para um token com muitos
+  //    dígitos ser classificado como segredo, não como CPF/telefone.
+  if (/\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}/i.test(normalized)) {
     return "secret_or_token";
   }
 
-  const drivePattern = /\b[A-Za-z]:[\\/]?/;
-  const pathPattern = /~[\\/]|\.\.[\\/]|[\\/]{2}[^\\/\s]+[\\/]|[\\/][\w.~-]+[\\/]/;
+  if (/\b(?:senha|password|passwd|secret|segredo|secreta|chave|token|api|key|credencial)\b[\s\S]{0,60}?(?:[:=]|é|eh|seria|será|seja|\s+e\s+)\s*\S+/i.test(normalized)) {
+    return "secret_or_token";
+  }
 
-  if (drivePattern.test(normalized) || pathPattern.test(flat)) {
+  // 2. E-mail estrutural, independente do alfabeto.
+  if (/[^\s@]+@[^\s@]+\.[^\s@]{2,}/u.test(flat)) {
+    return "third_party_pii";
+  }
+
+  // 3. CPF e telefone: qualquer sequência de 10 ou 11 dígitos, com qualquer
+  //    separador. Fail-closed: um ID longo pode ser descartado, PII não pode entrar.
+  if (/\d{10,11}/.test(digits)) {
+    return "third_party_pii";
+  }
+
+  // 4. Caminho absoluto, UNC, relativo ou unidade com extensão de arquivo.
+  if (/\b[A-Za-z]:(?:[\\/]|[\w.-]+\.[A-Za-z0-9]{1,5})/.test(normalized)) {
     return "file_path";
   }
 
-  // Report cru: chaves outcome e caveats/effected em qualquer ordem, aspas ou valor.
-  if (/\boutcome\b["']?\s*[:=]/i.test(normalized) &&
-      /\b(?:caveats|effected)\b["']?\s*[:=]/i.test(normalized)) {
+  if (/(?:^|[^\w])[\\/][\w.~-]+/.test(normalized) ||
+      /(?:\.\.|~)[\\/]/.test(flat) ||
+      /[\\/]{2}[^\\/\s]+[\\/]/.test(flat)) {
+    return "file_path";
+  }
+
+  // 5. Report cru: presença das chaves, em qualquer ordem, aspas ou valor.
+  if (/\boutcome\b\\?["']?\s*[:=]/i.test(normalized) &&
+      /\b(?:caveats|effected)\b\\?["']?\s*[:=]/i.test(normalized)) {
     return "raw_report";
   }
 
