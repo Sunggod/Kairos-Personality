@@ -3,6 +3,7 @@ data/
 secrets/
 models/*.gguf
 models/*.safetensors
+runtime/
 *.local
 .env
 .env.*
