@@ -52,6 +52,7 @@ export function rejectionReason(error: z.ZodError): string {
 
   const pathFallbacks: ReadonlyArray<readonly [string, string]> = [
     ["trace", "trace_required"],
+    ["slots", "slots_required"],
   ];
 
   for (const issue of error.issues) {

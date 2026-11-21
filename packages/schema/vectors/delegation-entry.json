@@ -58,7 +58,7 @@
         "tier": "sensitive",
         "lang": "pt-BR"
       },
-      "expect": { "ok": false, "reject": "schema_rejection", "path": "slots" }
+      "expect": { "ok": false, "reject": "slots_required", "path": "slots" }
     },
     {
       "id": "delegacao-risk-invalido",
