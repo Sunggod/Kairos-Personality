@@ -58,7 +58,7 @@ Brain**.
 O que depende de spike é "a definir" até o relatório existir em `docs/spikes/`. Não
 implemente de memória uma escolha que o spike ainda não fez.
 
-**Live2D saiu do projeto** (§8.1). Não use, não importe modelo de terceiros na v1.
+**O avatar é só sprites PNG em camadas** (§8.1). Não importe modelo de avatar de terceiros na v1.
 
 ---
 
@@ -286,8 +286,8 @@ A skill `phase-runner` detalha; o miolo é:
 - Log de ferramenta e mensagem de erro **nunca** entram no conteúdo gravado.
 
 **Sobre o estudo:** as revisões v3.1 e v3.2 (Akame, D16, D17, Q15, S9, R28, R29) ainda estão
-**sem registro de homologação**, e o estudo tem menções de Live2D que ficaram desatualizadas.
-Os dois pontos estão em `docs/status.md`; não construa a F6a em cima de D17 sem a homologação.
+**sem registro de homologação**.
+O ponto está em `docs/status.md`; não construa a F6a em cima de D17 sem a homologação.
 
 ---
 

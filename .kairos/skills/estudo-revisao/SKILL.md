@@ -104,7 +104,7 @@ Não exigem ADR: o canal de aprovação (já existe), nomes `user.notify`/`user.
 | Número medido difere da estimativa | Troca [Estimativa] por [Medido]; se a diferença quebra um orçamento, é `[Proposta de revisão]` |
 | Decisão pedia algo que a stack não faz | `[Decidido durante a implementação]` se a saída é interna; senão proposta |
 | Descoberta que contradiz uma invariante P* | **Não** edite a invariante para caber: pare e leve ao responsável como proposta |
-| Menção desatualizada no estudo (ex.: Live2D) | Separe **histórico legítimo** de **resíduo**; corrija o resíduo com nota; histórico fica |
+| Menção desatualizada no estudo (ex.: tecnologia já descartada) | Separe **histórico legítimo** de **resíduo**; corrija o resíduo com nota; histórico fica |
 
 ---
 

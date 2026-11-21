@@ -1001,7 +1001,7 @@ Uma fase só está entregue quando, todas as linhas:
   Brain, tier `sensitive`, aprovação por UI. A decisão de a v1 entregar isso está aberta (Q15).
 - Memória procedimental M4 (v2).
 - Fine-tuning na v1 (Q3); LoRA só se o S5 mostrar aderência insuficiente.
-- Live2D e importação de modelos de terceiros (§8.1, D7).
+- Importação de modelos de avatar de terceiros (§8.1, D7): o avatar é só sprites PNG em camadas.
 - Serviço de nuvem como padrão (P7); só como adaptador explícito e opt-in.
 - Personality como nó do Brain (D1): a infraestrutura nasce pronta e desligada, sem consumidor.
 - Planner LLM do Brain (ADR-A); harness do Coder; KairosBot.

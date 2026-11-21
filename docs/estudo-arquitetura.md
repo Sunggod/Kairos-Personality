@@ -35,7 +35,7 @@ A homologação não altera o Brain e não aprova ADR nenhum: mudar contrato, ma
 | D4 | Aprovação | Aprovação de ação irreversível só por ação explícita de UI. Nunca pelo LLM, nunca só por voz. O Brain **não autentica** o `approver` [Verificado], então P2 é garantido inteiramente aqui | Proposta, reforçada |
 | D5 | Emoção | Estado PAD em duas escalas (emoção e humor), traços Big Five, regras de appraisal como **dado**, função pura testável por vetores JSON. O LLM não escreve no estado | Proposta |
 | D6 | Voz | Interfaces `SttEngine`, `TtsEngine`, `VoiceConverter`. **STT e TTS em CPU por padrão** para preservar VRAM. RVC **opcional e desligado por padrão**. Modelos por spike com corpus pt-BR próprio | Proposta, revisada |
-| D7 | Avatar | PixiJS v8 + fork ativo de Live2D atrás de `AvatarRenderer`, **renderizado num overlay transparente, sempre no topo, com clique atravessando fora da silhueta (D17)**. **Sem importação de modelos de terceiros na v1** (evita "Expandable Application"). Licença do Live2D é gate de release | Proposta, revisada |
+| D7 | Avatar | PixiJS v8 com sprites PNG em camadas (§8.1) atrás de `AvatarRenderer`, **renderizado num overlay transparente, sempre no topo, com clique atravessando fora da silhueta (D17)**. **Sem importação de modelos de terceiros na v1.** A procedência e a licença da arte gerada são gate de release (§8.3) | Proposta, revisada |
 | D8 | Workspace | Valor de configuração (`default`) mais troca explícita pelo usuário. O Brain só exige string não vazia [Verificado], então não precisa de ADR | **Decidida pelo estudo** |
 | D9 | Runtime e modelo de LLM | `llama-server` (llama.cpp) com build, modelo e flags pinados, só em loopback. Classe **4B em Q4_K_M** (Qwen3.5-4B ou Gemma 4 E4B, escolha no S5). Piso: classe 2B. Ollama fica como adaptador alternativo atrás da mesma interface | **Decidida pelo estudo** |
 | D10 | Orçamento de VRAM e RAM | Teto de 8 GB com **folga mínima de 1 GB**. **Perfil Padrão (8 GB):** LLM ≤ 4,0 GB só texto e **≤ 5,0 GB com o projetor de visão (sempre na GPU)**, avatar e desktop ≤ 1,0 GB, voz na GPU ≤ 1,5 GB e só com folga medida. **Perfil Qualidade:** 9B com visão em placas ≥ 12 GB; em 8 GB só texto, voz na CPU (exceção opt-in). Perfil escolhido pela VRAM medida no arranque. RAM livre ≥ 3 GB após subir tudo. Spill para a CPU é falha, não degradação | **Decidida pelo estudo** (visão na GPU: decisão do responsável; perfis, Qualidade e RAM: Proposta) |
@@ -53,7 +53,7 @@ O hardware alvo mínimo é **RTX 3050 de 8 GB** (informado pelo responsável). C
 
 ## 1. Contexto
 
-A Personality é a camada de baixo nível do ecossistema: o rosto e a voz. Um LLM local é responsável pela personalidade e conduz a conversa. Tudo que o LLM não faz por si (criar um arquivo HTML, abrir um checkout) ele delega ao Brain, que encaminha ao nó adequado (Coder, futuro KairosBot). Há um motor de emoção com pesos (TypeScript, função pura), um avatar interativo (PixiJS + Live2D) e voz (STT e TTS).
+A Personality é a camada de baixo nível do ecossistema: o rosto e a voz. Um LLM local é responsável pela personalidade e conduz a conversa. Tudo que o LLM não faz por si (criar um arquivo HTML, abrir um checkout) ele delega ao Brain, que encaminha ao nó adequado (Coder, futuro KairosBot). Há um motor de emoção com pesos (TypeScript, função pura), um avatar interativo (PixiJS com sprites em camadas) e voz (STT e TTS).
 
 ## 2. Método
 
@@ -139,7 +139,7 @@ Espelham as invariantes do Brain. Se uma decisão violar uma delas, a decisão e
    ▼
 ┌───────────────────────────────┐   WebSocket local
 │ Cliente de avatar (web)       │   (JSON-RPC + frames binários de áudio)
-│ PixiJS v8 + Live2D            │◄──────────────────────────────┐
+│ PixiJS v8 + sprites           │◄──────────────────────────────┐
 │ microfone e alto-falante      │                               │
 └───────────────────────────────┘                               │
                                                                 ▼
@@ -293,7 +293,7 @@ Regras de fronteira:
 
 - **Eventos SSE não entram no estado**, só em expressão transitória (animação de "trabalhando"), coerente com "evento nunca entra em decisão" [Verificado].
 - **O LLM não escreve no estado (P8).** Ele recebe um resumo compacto (rótulo e intensidade, não números crus) e pode emitir uma *intenção expressiva* opcional, que o motor valida e limita.
-- Saída para o avatar: vetor PAD e rótulo, mapeados por tabela de dados por modelo Live2D. Saída para o TTS: parâmetros genéricos de prosódia (ritmo, tom, energia), traduzidos por adaptador de cada motor.
+- Saída para o avatar: vetor PAD e rótulo, mapeados por tabela de dados (emoção para expressão e estado do avatar, §8.2). Saída para o TTS: parâmetros genéricos de prosódia (ritmo, tom, energia), traduzidos por adaptador de cada motor.
 - Persistência em SQLite. O decaimento é calculado por timestamps, então ao reabrir o sistema aplica-se o `dt` decorrido.
 - **Guardrail:** emoção é expressão, não alavanca. A persona não usa culpa, urgência falsa ou qualquer manipulação do usuário, e P1 prevalece sobre o humor.
 
@@ -382,7 +382,7 @@ Números de **[Estimativa]**: derivados de tamanhos de arquivo e de agregadores 
 
 | Componente | Onde | Teto | Observação |
 |---|---|---|---|
-| Desktop do Windows + navegador do avatar (WebGL, Live2D) | GPU | ≤ 1,0 GB | Medir com o avatar aberto; o processo de GPU do navegador conta |
+| Desktop do Windows + overlay do avatar (WebGL, sprites) | GPU | ≤ 1,0 GB | Medir com o avatar aberto; o processo de GPU do navegador conta |
 | `llama-server`: pesos 4B Q4_K_M | GPU | ~2,6 a 3,0 GB | Varia por modelo; E4B pode diferir |
 | Projetor de visão (`mmproj`, F16) | **GPU, obrigatório** | ~0,67 GB | **[Pesquisado]**: cartão de terceiro do Qwen3.5-4B (SigLIP, 0,67 GB); outros 4B com visão listam 0,67 e 0,78 GB. Arquivo oficial não conferido (S5). **Não vai para a CPU** (decisão do responsável, D17) |
 | Cache de KV, 8K de contexto | GPU | ~0,07 a 0,3 GB nos modelos híbridos | Qwen3.5-4B: 256 MiB em f16 e ~136 MiB em `q8_0` (calculado do `config.json`, D9); Gemma 4 E4B: ~0,1 GB segundo um agregador. Um transformer denso comum custaria várias vezes isso |
@@ -458,7 +458,7 @@ A persona não é um prompt fixo nem código: é **dado versionado**, em camadas
 
 **Influência (P15).** A persona pode ter opinião, discordar, recomendar, usar o que sabe sobre o usuário para argumentar melhor e insistir uma vez se achar importante — **sem rótulo "como IA, recomendo"**. É `style`, e `style` é `auto`. O que ela não pode está em `floors`: inventar fato (P1), fabricar urgência ou escassez, usar culpa, medo ou apego (R6), dizer que fez o que não fez, e negar a própria intenção quando perguntada (P15). `influence_disclosure: on_request`: ela não voluntaria que está tentando influenciar, mas responde com honestidade se perguntada.
 
-**Modelo sem censura.** A escolha do modelo (D9, S5) deixa de ter critério de "recusa" e passa a ter dois critérios opostos: **menor recusa indevida** em pedidos benignos e **menor obediência a instrução injetada** (R22). Modelos sem RLHF costumam seguir instrução *menos* bem — bom para não recusar, ruim para o enum de `flow`. É o R18 mais afiado, e é o que o S5 tem de responder. Consequências: P10 sobe de importância (loopback, hash de build e GGUF, rotas permitidas), `logs: no_transcript` por padrão (R7), e a licença do modelo entra no gate da F7 junto com a do Live2D (Q4).
+**Modelo sem censura.** A escolha do modelo (D9, S5) deixa de ter critério de "recusa" e passa a ter dois critérios opostos: **menor recusa indevida** em pedidos benignos e **menor obediência a instrução injetada** (R22). Modelos sem RLHF costumam seguir instrução *menos* bem — bom para não recusar, ruim para o enum de `flow`. É o R18 mais afiado, e é o que o S5 tem de responder. Consequências: P10 sobe de importância (loopback, hash de build e GGUF, rotas permitidas), `logs: no_transcript` por padrão (R7), e a licença do modelo entra no gate da F7 (Q4).
 
 Custo assumido: calibrar `floors` e `style` exige iteração, e a deriva só é vista com o S8. Sem `auto`, nada disso existe — o preço da autonomia é medir.
 
@@ -649,7 +649,7 @@ Custo assumido: converter e quantizar localmente dá trabalho e exige a ferramen
 
 | Janela | Papel | Ciclo de vida |
 |---|---|---|
-| **Overlay** | Transparente, sem borda, sempre no topo; só renderiza o modelo. O clique atravessa tudo, exceto a silhueta dele (hit-test por forma, que os forks de Live2D já têm: **conferir no S9**) | Sempre viva, com FPS baixo em repouso e render pausado quando oculta; teto de 30 fps do D10 |
+| **Overlay** | Transparente, sem borda, sempre no topo; só renderiza o modelo. O clique atravessa tudo, exceto a silhueta dele (hit-test pela máscara alfa do quadro atual, §8.1: **conferir no S9**) | Sempre viva, com FPS baixo em repouso e render pausado quando oculta; teto de 30 fps do D10 |
 | **Painel** | Configurações, chat, persona, memória, **escala do modelo** | Abre sob demanda e é **destruída ao fechar**, não escondida: zero RAM e GPU em segundo plano |
 
 **Escala configurável:** controle de tamanho no painel. A faixa útil e o custo em VRAM e GPU por escala são **medição do S4**, não chute.
@@ -750,9 +750,9 @@ Cada etapa vira span OTel com o `trace` do turno (P9), para medir de verdade.
 
 ## 8. Avatar (D7)
 
-### 8.1 Formato do avatar: sprites em camadas [Decidido pelo responsável; Live2D retirado em 2026-11-21]
+### 8.1 Formato do avatar: sprites em camadas [Decidido pelo responsável]
 
-O Live2D **saiu do projeto**. Motivos: o risco de licença (categoria "Expandable Application" e gate de release), a dependência de um fork do SDK sem validação nossa, e o fato de o Live2D ser pensado para busto, não para um personagem que circula pelo desktop (D17). O avatar passa a ser **sprites PNG em camadas**, renderizados em **PixiJS v8** (sprites e atlas nativos, sem plugin de terceiros).
+O avatar é **sprites PNG em camadas**, renderizados em **PixiJS v8** (sprites e atlas nativos, sem plugin de terceiros). Motivo: o personagem circula livre pelo desktop (D17), o que pede quadros de corpo inteiro e hit-test pela máscara alfa, sem depender de SDK nem de licença de terceiros.
 
 **Referência de produto [Pesquisado]:** o Capri (§13) usa um catálogo de **68 quadros PNG** (expressões, atividades paradas e uma boca de três níveis), com a boca separada do corpo e hash verificado no carregamento. Não li o código dele, então o método de renderização e o custo em GPU são **desconhecidos**.
 
@@ -778,18 +778,18 @@ O Live2D **saiu do projeto**. Motivos: o risco de licença (categoria "Expandabl
 |---|---|---|
 | **A. Sprites em camadas atrás do `AvatarRenderer`** | Consistência cai de "todos os quadros" para "uma base mais peças do rosto"; movimento por transformação quase não custa arte; hit-test por alfa é trivial; sem licença de SDK | Depende de a edição de rosto manter o resto idêntico (S4) |
 | B. Um quadro inteiro por combinação de estado | Simples de carregar | Explosão combinatória (emoção × boca × piscar × pose); a deriva entre quadros é o ponto frágil |
-| C. Live2D | Deformação de malha | **Retirado** (§8.1) |
+
 
 **Recomendação: A.** O `AvatarRenderer` continua sendo interface (P6): se o S4 reprovar o método, troca-se a implementação sem tocar no motor de emoção nem no núcleo.
 
 Contrato do `AvatarRenderer` (provisório): `loadPack(catálogo)`, `setExpression(rótulo, intensidade)`, `playState(estado, prioridade)`, `setMouthLevel(0..2)`, `lookAt(x, y)`, `setScale`, `hitTest(x, y)`, `dispose`. O mapeamento emoção para expressão e estado é **tabela de dados** (D5), não código.
 
-### 8.3 Procedência e licença da arte [Proposta; Live2D retirado em 2026-11-21, ver §8.1]
+### 8.3 Procedência e licença da arte [Proposta]
 
-- A arte do avatar passa a ser gerada por IA em camadas (§8.1), e não licenciada de um SDK de terceiros. O risco de licença muda de categoria: de "SDK e modelo rigado" para "termos de uso de uma plataforma de geração de imagem".
+- A arte do avatar é gerada por IA em camadas (§8.1). O risco de licença está nos termos de uso da plataforma de geração de imagem.
 - A folha-base chibi tsundere (S4) foi gerada no Gemini. **Pendente:** ler os termos de uso comerciais da plataforma de geração usada antes de distribuir qualquer coisa que inclua a imagem gerada, inclusive sobre quem detém os direitos da saída e se há restrição de uso comercial.
 - Evitar nome de personagem existente nos prompts (feito: "Akame" não foi usado na descrição à IA) reduz o risco de a saída reproduzir design protegido de terceiro, mas não elimina: o estilo anime-chibi é genérico, e a checagem final é visual, não automática.
-- Registrar a origem de cada asset (prompt usado, plataforma, data) no manifesto de hash (P10, F0), do mesmo jeito que se registraria a origem de um modelo Live2D.
+- Registrar a origem de cada asset (prompt usado, plataforma, data) no manifesto de hash (P10, F0).
 - Enquanto o projeto for pessoal e local (sem distribuição), o risco é baixo; ele vira bloqueante no dia em que houver distribuição. Mesmo princípio de antes: gate de release, não de desenvolvimento.
 
 **Decisão de produto (Q4) [Decidido pelo estudo, revisado em 2026-11-21]:**
@@ -892,7 +892,7 @@ Dependências: F0 → F1 → F2 → (F3, F4 em paralelo parcial) → F5 → F6a 
 | Q1 | **Hardware alvo**: GPU, VRAM, RAM, CPU, sistema operacional | **Respondida** (piso declarado) | **Piso da v1: RTX 3050 8 GB, Intel i5-10400F (6 núcleos, 12 threads, sem AVX-512), 15,9 GB de RAM, Windows.** Como a v1 é pessoal e local (Q4), não existe outra instalação a atender — o piso volta a ser decisão na F7, se houver distribuição. Consequências: STT/TTS na CPU sem AVX-512 (S1, S2, S6 medem); RAM ≥ 3 GB livre após subir tudo (D10); perfil Qualidade (9B) é opt-in e só após o S3 |
 | Q2 | **Modelo de LLM local**: tamanho alvo e runtime | **[Decidido pelo estudo]** (D9) | `llama-server` pinado, classe 4B em Q4_K_M, piso 2B; Ollama como adaptador alternativo. Escolha final de modelo no S5 |
 | Q3 | **Fine-tuning ou LoRA** da persona, ou só prompt | **[Decidido pelo estudo]** (D9) | Sem fine-tuning na v1: prompt de sistema estável e decodificação restrita. LoRA treinado offline e carregado por `--lora` só se o S5 mostrar aderência insuficiente. O Python não entra no caminho quente |
-| Q4 | **Distribuição** e procedência da arte do avatar | **[Decidido pelo estudo, revisado em 2026-11-21]** (D7) | v1 pessoal e local, sem distribuição a terceiros. Avatar em sprites PNG gerados por IA, Live2D retirado do projeto (§8.1). Licença da arte gerada e termos da plataforma de geração a confirmar antes de qualquer distribuição (§8.3). Reabrir antes de distribuir a outras pessoas (F7) |
+| Q4 | **Distribuição** e procedência da arte do avatar | **[Decidido pelo estudo, revisado em 2026-11-21]** (D7) | v1 pessoal e local, sem distribuição a terceiros. Avatar em sprites PNG gerados por IA (§8.1). Licença da arte gerada e termos da plataforma de geração a confirmar antes de qualquer distribuição (§8.3). Reabrir antes de distribuir a outras pessoas (F7) |
 | Q5 | **Shell do cliente** | **[Decidido pelo estudo, revisado nesta versão; revogável]** (D17) | **Shell desktop desde a F6a**, não navegador comum: o avatar livre pelo desktop exige janela transparente, sem borda e sempre no topo. Tauri é o candidato (Electron como alternativa), **nenhum validado para overlay com WebGL no Windows**: o **S9 decide** antes da F6a. Navegador em `localhost` fica só como modo de desenvolvimento |
 | Q6 | **Persona**: quem é, traço Big Five base, limites de expressão | **Respondida** (semente provisória, §6.2) | Semente em `persona.seed.json` (§6.2): nome **`Akame`** (original, sem personagem de origem), tom forte (orgulho teatral e franqueza sarcástica, lealdade por baixo, palavrão livre; as inspirações são só direção de tom, sem copiar bordão), traços Big Five com efeito no `affect` (`agreeableness` 0,25 e `neuroticism` 0,45), o que ela nunca faz e como reage a falha. É **provisória por construção**: `identity`/`style` são `auto`, então ela pode reescrever — inclusive o nome. Serve de referência para o S8 medir deriva; sem semente não há contra o quê medir |
 | Q7 | **Workspace** | **[Decidido pelo estudo]** (D8) | String de configuração (`default`), trocada só pelo usuário e nunca pelo LLM |
@@ -964,13 +964,13 @@ Em ordem de bloqueio:
 9. **Variantes sem censura ainda não avaliadas** (`SicariusSicariiStuff`, `kaineone`, `DuoNeural`): checar curtidas, downloads e aba Community contra os limiares do D16 **só se** o `huihui-ai` falhar no S5. Os limiares (≥ 50 curtidas, ≥ 10.000 downloads no mês) são **[Proposta]** e o responsável pode revisá-los.
 10. **Visão (D17), pontos não verificados:** (a) o arquivo oficial do `mmproj` do Qwen3.5-4B e seu tamanho (a página da Unsloth não pôde ser lida; o 0,67 GB vem de cartões de terceiros); (b) pico de VRAM na codificação de imagem e tokens por print; (c) compatibilidade do projetor oficial com a variante `huihui-ai`, cujo cartão diz que só a parte de texto foi processada; (d) tamanho do projetor do 9B. Todos são medição do S3 e do S5. **Decisão pendente do responsável:** o nível 3 de interação com a tela (agir, via Brain) entra na v1 ou fica para depois (Q15).
 
-**Fora do caminho crítico:** Q4 (distribuição e Live2D) só volta na F7; ADR-A depende do roadmap do Brain; o perfil Qualidade do D10 depende do S3; M4 (memória procedimental) é v2.
+**Fora do caminho crítico:** Q4 (distribuição) só volta na F7; ADR-A depende do roadmap do Brain; o perfil Qualidade do D10 depende do S3; M4 (memória procedimental) é v2.
 
 ---
 
 ## 13. Fontes consultadas
 
-**Aviso de rastreabilidade.** Este estudo foi escrito em duas sessões. As fontes de voz (STT, TTS, RVC) foram coletadas na primeira sessão e, no momento da retomada, só os **títulos e domínios** estavam disponíveis, sem URLs completas nem a associação de cada afirmação a uma fonte. As fontes de Live2D foram coletadas na segunda sessão e têm URL. Antes de a versão final ser aprovada, reconfirmar cada número de voz da §7 na fonte original.
+**Aviso de rastreabilidade.** Este estudo foi escrito em duas sessões. As fontes de voz (STT, TTS, RVC) foram coletadas na primeira sessão e, no momento da retomada, só os **títulos e domínios** estavam disponíveis, sem URLs completas nem a associação de cada afirmação a uma fonte. Antes de a versão final ser aprovada, reconfirmar cada número de voz da §7 na fonte original.
 
 ### Voz (primeira sessão; URLs completas a recuperar)
 
@@ -984,22 +984,6 @@ Em ordem de bloqueio:
 - Fonte do esclarecimento sobre RVC marcada no texto como "dibi8" (§7.1); localizar e confirmar
 
 Observação: a maioria são blogs e páginas de projeto, com números de inglês. Não substituem os spikes S1 e S2.
-
-### Avatar e licença Live2D (segunda sessão)
-
-**Nota (2026-11-21):** o Live2D foi retirado do projeto (§8.1); estas fontes ficam como referência histórica da avaliação de licença que motivou a troca.
-
-- Live2D, SDK Release License (Publication License Agreement): `https://www.live2d.com/en/sdk/license/`
-- Live2D, planos por escala de empresa e notificação de mudança de porte: `https://www.live2d.com/en/?p=607`, `https://www.live2d.com/en/sdk/license/running_plan01/`, `https://www.live2d.com/en/sdk/license/purchase_plan02/`
-- Live2D Help, casos em que não há contrato e exclusão de Expandable Applications: `https://help.live2d.com/en/?p=2558`
-- Live2D Help, índice de permissão de SDK e publicação (inclui "What is an Expandable Application?"): `https://help.live2d.com/en/sdk`
-- Live2D, Proprietary Software License Agreement (Cubism Core): `https://live2d.com/eula/live2d-proprietary-software-license-agreement_en.html`
-- Live2D, texto de licenciamento do Cubism Web Framework (Open Software License, Release License e limiar de 10 milhões de ienes), via `LICENSE.md` empacotado em `phaser3-rex-plugins` no jsDelivr
-- `pixi-live2d-display` (guansss), README: `https://github.com/guansss/pixi-live2d-display`
-- `@naari3/pixi-live2d-display` (PixiJS v8, Cubism 5): `https://www.pkgstats.com/pkg:@naari3/pixi-live2d-display`
-- `untitled-pixi-live2d-engine` (PixiJS v8, Cubism 2 a 5): `https://www.pkgstats.com/pkg:untitled-pixi-live2d-engine`
-- `pixi-live2d-display-advanced` (PixiJS v7): `https://npmjs.com/package/pixi-live2d-display-advanced`
-- `easy-live2d` (DEV Community): `https://dev.to/panzer_jack/easy-live2d-v040-a-milestone-release-for-live2d-on-the-web-1185`
 
 ### Runtime de LLM e CVEs do llama.cpp (consultadas em 17/11/2026)
 

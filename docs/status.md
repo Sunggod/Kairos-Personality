@@ -22,13 +22,13 @@ Atualizado em: 2026-11-21 · por: sessão de planejamento (nenhum código existe
 ## Pendências do responsável (bloqueiam ou condicionam agentes)
 
 **Triagem de 2026-11-21: nada aqui bloqueia a F0 até a F5.** O agente pode começar já. As
-pendências 1, 3 e 8 só importam mais adiante e ficam adiadas com a fase indicada; as 2, 4 e 6
-foram dispensadas; as 5, 7 e 9 foram resolvidas com o padrão descrito na linha.
+pendências 1, 3 e 8 só importam mais adiante e ficam adiadas com a fase indicada; as 4 e 6
+foram dispensadas; as 2, 5, 7 e 9 foram resolvidas com o padrão descrito na linha.
 
 | # | Pendência | Bloqueia | Origem |
 |---|---|---|---|
 | 1 | **[Adiada: só antes da F6a]** **Homologar as revisões v3.1 e v3.2 do estudo** (Akame, D16, Q14, D17, Q15, S9, R28, R29, D7/D10/Q5 revisados) — estão "sem registro de homologação" | F6a, F6b, F6c e S9 | estudo, cabeçalho |
-| 2 | **[Dispensada: não bloqueia; o agente corrige resíduo de Live2D que encontrar, com nota no estudo]** **Revisar as menções de Live2D que ficaram desatualizadas** no estudo: confirmadas no §0 (linha do D7), no §1 e no D17 item 1; a busca acusa 13 ocorrências fora do §13, várias legítimas (histórico em §8.1/§8.3/Q4). Falta separar o que é histórico do que é resíduo | consistência do estudo | verificação em 2026-11-21 |
+| 2 | **[Resolvida em 2026-11-21: referências ao modelo de avatar descartado removidas do estudo, do roadmap, do `AGENTS.md` e das skills]** Resíduos do avatar antigo no estudo | consistência do estudo | verificação em 2026-11-21 |
 | 3 | **[Adiada: só antes da F6c. Padrão enquanto isso: a v1 entrega os níveis 1 e 2; o nível 3 fica fora, como o roadmap já declara]** **Q15**: a v1 entrega o nível 3 de interação com a tela (agir via Brain) ou só os níveis 1 e 2? | escopo da F6c e do Brain | estudo §11.1 |
 | 4 | **[Dispensada: o S1/S2/S6 medem a voz por conta própria; as fontes do estudo são só contexto]** **Reconfirmar as fontes de voz** (§13): URLs completas da primeira sessão não recuperadas; fonte do esclarecimento sobre RVC a localizar | homologação final | estudo §12, item 8 |
 | 5 | **[Resolvida com padrão proposto, ajustável por você antes do S5: limiares do estudo mantidos (≥ 50 curtidas, ≥ 10.000 downloads/mês); a variante sem censura só é aceita se a queda contra o oficial for de no máximo 3 pontos percentuais em acerto de delegação e em conformidade do enum de `flow`. O agente copia isso como critério na hipótese do relatório do S5, antes de medir]** **Limiares do D16** (≥ 50 curtidas, ≥ 10.000 downloads/mês) e a **margem de piora aceitável** do enum de `flow`, definidos **antes** do teste do S5/S8 | S5, S8 | estudo D16 |
@@ -132,6 +132,15 @@ Mais recente primeiro. Cada sessão termina com uma entrada.
 - Próxima ação: <uma frase>
 - Perguntas ao responsável: <lista ou "nenhuma">
 ```
+
+### 2026-11-21 (entrega do workspace) — Claude, sessão de planejamento
+- Feito: pendências triadas (só as essenciais mantidas); referências ao avatar descartado
+  removidas do estudo (D7, §1, diagrama, §4, orçamento, D12, D17, §8.1 a §8.3, Q4, §13), do
+  roadmap, do `AGENTS.md` e das skills; repositório criado e publicado em
+  `github.com/Sunggod/Kairos-Personality` (branch `main`), com `.gitignore` e `.gitattributes`.
+- Ficou pendente: nenhum código existe; amostrador de `scripts/measure/` não escrito.
+- Próxima ação: o agente abre a F0 pelo S7 (skill `phase-runner`).
+- Perguntas ao responsável: pendências 1 e 3 (só antes da F6a e da F6c); 8 (ADRs do Brain).
 
 ### 2026-11-21 (retomada) — Claude, sessão de planejamento
 - Feito: a sessão anterior parou no meio da escrita das skills; só `phase-runner` existia em
