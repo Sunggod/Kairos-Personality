@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { affectStateSchema } from "./affect";
+import { memoryRecordSchema } from "./memory";
 import {
   autoWriteSchema,
   lockedWriteSchema,
@@ -52,6 +53,11 @@ export const jsonSchemas = {
     affectStateSchema,
     "Kairos Personality Affect State",
     "https://kairos-personality.local/schema/affect-state.json",
+  ),
+  "memory-record": toSchema(
+    memoryRecordSchema,
+    "Kairos Personality Memory Record",
+    "https://kairos-personality.local/schema/memory-record.json",
   ),
 } as const;
 

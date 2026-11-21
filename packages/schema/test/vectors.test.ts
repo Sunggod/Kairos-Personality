@@ -6,6 +6,7 @@ import {
   affectStateSchema,
   autoWriteSchema,
   lockedWriteSchema,
+  memoryRecordSchema,
   parseVectorFile,
   personaLayersSchema,
   runVector,
@@ -18,6 +19,7 @@ const vectorSchemas: Record<string, z.ZodType> = {
   "auto-write": autoWriteSchema,
   "locked-write": lockedWriteSchema,
   "affect-state": affectStateSchema,
+  "memory-record": memoryRecordSchema,
 };
 
 const vectorsDir = fileURLToPath(new URL("../vectors/", import.meta.url));

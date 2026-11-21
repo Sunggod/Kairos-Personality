@@ -1,0 +1,152 @@
+{
+  "schema": "memory-record",
+  "vectors": [
+    {
+      "id": "memoria-m2-valida",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-01",
+        "tier": "M2",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Ela prefere respostas curtas e diretas."
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "memoria-m1-com-trace",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-02",
+        "tier": "M1",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "trace": "trace-exemplo-01",
+        "expiresAt": "2026-12-21T10:00:00Z",
+        "content": "Resumo sintetico do turno."
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "memoria-m3-pii-email-terceiro",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-03",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "O contato da colega e maria.silva@example.test."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-pii-cpf-terceiro",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-04",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Documento de exemplo: 000.000.000-00."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-token",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-05",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Chave de teste: sk-TEST0000000000000000000000"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-senha",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-06",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "senha: ExemploSomenteTeste123!"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-caminho",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-07",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Estava em C:\\Usuarios\\exemplo\\notas.txt"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-report-cru",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-08",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "{\"outcome\":\"succeeded\",\"caveats\":[],\"effected\":[]}"
+      },
+      "expect": { "ok": false, "reject": "raw_report", "path": "content" }
+    },
+    {
+      "id": "tombstone-sem-conteudo",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-09",
+        "tier": "M2",
+        "kind": "tombstone",
+        "origin": "persona",
+        "createdAt": "2026-11-01T10:00:00Z",
+        "forgottenAt": "2026-11-21T10:00:00Z",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "tombstone-com-conteudo",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-10",
+        "tier": "M2",
+        "kind": "tombstone",
+        "origin": "persona",
+        "createdAt": "2026-11-01T10:00:00Z",
+        "forgottenAt": "2026-11-21T10:00:00Z",
+        "hash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "content": "o que foi esquecido nao pode voltar"
+      },
+      "expect": { "ok": false, "reject": "tombstone_with_content" }
+    },
+    {
+      "id": "memoria-sem-schema-version",
+      "input": {
+        "id": "mem-p2-exemplo-11",
+        "tier": "M2",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Preferencia sintetica."
+      },
+      "expect": { "ok": false, "reject": "schema_version", "path": "schemaVersion" }
+    }
+  ]
+}

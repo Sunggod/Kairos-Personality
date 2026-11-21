@@ -43,6 +43,9 @@ export function rejectionReason(error: z.ZodError): string {
 
   for (const issue of error.issues) {
     if (issue.code === "unrecognized_keys") {
+      if (issue.keys.includes("content")) {
+        return "tombstone_with_content";
+      }
       return "unknown_field";
     }
   }
