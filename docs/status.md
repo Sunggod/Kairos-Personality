@@ -4,18 +4,18 @@ Andamento, handoff e registro de gate. **O roadmap é a especificação e não �
 registrar andamento; este arquivo é.** Todo agente lê isto primeiro e atualiza ao terminar a
 sessão.
 
-Atualizado em: 2026-11-21 · por: agente de implementação (F0 fechada)
+Atualizado em: 2026-11-21 · por: agente de implementação (F1 fechada)
 
 ---
 
 ## Onde estamos
 
-- **Fase em curso:** nenhuma. **F0 Fundação fechada** com gate verde em 2026-11-21; S7
-  concluído (`docs/spikes/S7-hardening-runtime.md`).
-- **Próxima ação:** abrir a **F1** (contrato interno), começando pelos schemas de persona,
-  memória, afeto e delegação em `packages/schema`, com `contract-first`. Em paralelo: **S5**
-  (modelo) antes da F4; S1/S2/S6 antes da F5.
-- **Bloqueado por:** nada para a F1. Pendências 1 e 3 só antes da F6a e da F6c.
+- **Fase em curso:** nenhuma. **F1 Contrato interno fechada** com gate verde em 2026-11-21;
+  F0 permanece verde e pinada.
+- **Próxima ação:** **F2 (cliente do Brain) só depois da liberação do responsável** — exige o
+  Brain rodando de verdade para B14/B15/B11/B12. Em paralelo: **S5** (modelo) antes da F4;
+  S1/S2/S6 antes da F5.
+- **Bloqueado por:** liberação para abrir a F2. Pendências 1 e 3 só antes da F6a e da F6c.
 
 ---
 
@@ -70,7 +70,7 @@ Estado: `não iniciado` · `em curso` · `concluído` (relatório em `docs/spike
 | Fase | Estado | Gate | Commit | Data |
 |---|---|---|---|---|
 | F0 Fundação | concluída | verde | 901119b | 2026-11-21 |
-| F1 Contrato interno | não iniciada | — | — | — |
+| F1 Contrato interno | concluída | verde | 9df5d13 | 2026-11-21 |
 | F2 Cliente do Brain | não iniciada | — | — | — |
 | F3 Emoção, persona e memória | não iniciada | — | — | — |
 | F4 LLM e delegação | não iniciada | — | — | — |
@@ -114,6 +114,20 @@ modelo abaixo.
 - Desvios do estudo ou do Fluxo: nenhum. Extensão local: `runtime/` adicionado ao `.gitignore` para não versionar os 56 arquivos do bundle; `scripts/` virou workspace para fechar os quatro espaços do aceite
 - Itens que não foram verificados: fuzzing da API C / GGUF malicioso, soak de estabilidade e orçamento formal de VRAM (S3/F7); transição real de sleep (P10 proíbe a flag); CVEs de JNI Android (não estão no artefato Windows)
 
+### F1 — Contrato interno — 2026-11-21
+
+- Commit: dcddb1d (entregas em 04e8e6b, 07f4a26, 984610d, 8a6971d, 53a5711, d15fbca, ec1b5e9, 9df5d13, c511e34, 82adaca, 6d31844, e639b80, dcddb1d)   Máquina: piso   Build pinado: inalterado (`runtime.lock.json` / `models.lock.json`)
+- bun install && bunx tsc --noEmit && bun test: verde; 37 testes em 11 arquivos, 333 asserções; `bun test packages/schema`: 14 testes em 5 arquivos, 284 asserções
+- Comandos do gate da fase:
+    bun test packages/schema: 14 pass, 0 fail
+    bun run gen:schema && git diff --exit-code packages/schema/generated: 10 JSON Schemas gerados, diff vazio (exit 0)
+    bun run check:delegations: 1 entrada, 1 fluxo do Brain, 0 avisos, exit 0
+    bunx tsc --noEmit: exit 0
+- Medições (se houver): nenhuma — F1 é contrato, não medição
+- Itens manuais registrados: a semente é comparada com o bloco JSON de §6.2 extraído do estudo (igualdade exata, teste automatizado); `git status` do Brain limpo depois de `check:delegations`; `bun install` do zero reproduziu `bun.lock` idêntico; CI verde no commit dcddb1d; varredura sem TODO/FIXME/`any`/`.skip`; cinco rodadas de revisão independente das barreiras P13/P14/R26: P13 resistiu sem ressalvas; 22 variações de bypass do filtro M2/M3 foram encontradas nas quatro primeiras e fechadas com vetores próprios, culminando na reescrita do filtro com detectores estruturais. **Trade-off explícito e versionado como vetor:** qualquer sequência de 10/11 dígitos é tratada como PII em M2/M3 — um ID longo pode ser descartado, CPF/telefone nunca entram (fail-closed)
+- Desvios do estudo ou do Fluxo: nenhum. Extensões locais justificadas: gerador passou a escrever em `packages/schema/generated/` (exigido pelo comando do CI); `.gitignore` de `data/` para `/data/` para versionar `packages/schema/data/`; `check:delegations` lê também `.yml`/`.json`, como o README do Brain declara, sempre sem escrita. Nenhuma nota de estudo foi necessária: as decisões tomadas eram internas e foram registradas em `AGENTS.md` §9 e aqui
+- Itens que não foram verificados: F2 não foi iniciada (B11/B12/B14/B15 contra o Brain real ficam para lá); migração de dado existente (não houve); julgamento humano de persona (S8) e demais spikes
+
 ---
 
 ## Decisões tomadas durante a implementação
@@ -129,7 +143,11 @@ modelo abaixo.
 Quando o agente se afasta do roteiro, uma linha: data, fase, o que mudou, por quê. Se o desvio
 se repetir, é sinal de que a skill ou o Fluxo precisa de edição.
 
-(nenhum ainda)
+2026-11-21 · F1 · nenhum desvio do Fluxo. Três ajustes locais: saída do gerador de
+`packages/schema/schema/` para `packages/schema/generated/` (o comando do CI exige esse
+caminho); `.gitignore` de `data/` para `/data/` (para versionar `packages/schema/data/`
+sem liberar o `data/` local); `check:delegations` aceita `.yaml`, `.yml` e `.json` porque o
+README do Brain declara essas extensões — continua somente leitura.
 
 ---
 
@@ -144,6 +162,22 @@ Mais recente primeiro. Cada sessão termina com uma entrada.
 - Próxima ação: <uma frase>
 - Perguntas ao responsável: <lista ou "nenhuma">
 ```
+
+### 2026-11-21 — agente de implementação (F1)
+- Feito: F1 fechada e publicada em treze commits (04e8e6b, 07f4a26, 984610d, 8a6971d,
+  53a5711, d15fbca, ec1b5e9, 9df5d13, c511e34, 82adaca, 6d31844, e639b80, dcddb1d):
+  `AffectState` e `PersonaLayers` com P13 irrepresentável no tipo, `MemoryRecord` com
+  tombstone sem conteúdo e filtro R26, `WorkingFrame`, `DelegationEntry`, 10 JSON Schemas
+  gerados, `delegations.json` com `check:delegations` somente leitura e `persona.seed.json`
+  idêntico a §6.2. Gate da F1 e gate base verdes; CI verde em dcddb1d. Cinco rodadas de
+  revisão independente: P13 resistiu sem ressalvas; 22 variações de bypass do filtro M2/M3
+  foram fechadas e o filtro reescrito com detectores estruturais. Veredito final: P13 e
+  P14/R26 resistidas, com fail-closed documentado para sequências de 10/11 dígitos.
+- Ficou pendente: a F2 não foi aberta — exige liberação e o Brain rodando para B11/B12/B14/B15;
+  os spikes S5/S1/S2/S3/S6/S4/S9/S8 seguem; revisões v3.1/v3.2 continuam sem homologação
+  (só antes da F6a).
+- Próxima ação: aguardar liberação para a F2; S5 pode ser preparado em paralelo.
+- Perguntas ao responsável: liberar a F2 com o Brain de verdade disponível.
 
 ### 2026-11-21 — agente de implementação (F0)
 - Feito: S7 concluído e publicado (8206bc1); F0 inteira entregue em cinco commits (bf5ee03
