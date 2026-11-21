@@ -1,5 +1,5 @@
 # Dados locais do usuario, segredos e modelos (AGENTS.md, regra 9; P7, P10)
-data/
+/data/
 secrets/
 models/*.gguf
 models/*.safetensors

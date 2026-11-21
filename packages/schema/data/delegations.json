@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "schemaVersion": 1,
+      "flow": "two-step",
+      "description": "Executa duas etapas encadeadas e devolve o resultado agregado.",
+      "risk": "none",
+      "tier": "open",
+      "lang": "pt-BR",
+      "slots": {
+        "type": "object",
+        "properties": {
+          "objective": { "type": "string", "minLength": 1 }
+        },
+        "required": ["objective"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
