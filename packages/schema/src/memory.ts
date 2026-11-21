@@ -20,33 +20,56 @@ export type MemoryOrigin = z.infer<typeof memoryOriginSchema>;
  * arquivo, PII de terceiro e Report cru não entram em M2/M3 (R26, P14).
  * Os padrões são sintéticos por construção: nenhum dado real é necessário.
  */
-export function sensitiveContentCode(content: string): string | null {
-  // Ofuscação Unicode (por exemplo, @ e . fullwidth) não pode burlar o filtro.
-  const normalized = content.normalize("NFKC");
+const HOMOGLYPHS: Readonly<Record<string, string>> = {
+  а: "a", е: "e", о: "o", р: "p", с: "c", х: "x", і: "i", ј: "j",
+  ѕ: "s", у: "y", м: "m", к: "k", т: "t", б: "b", н: "h", г: "r",
+  ο: "o", α: "a", ε: "e", ρ: "p", ι: "i", κ: "k", ν: "v", τ: "t", χ: "x",
+};
 
-  const patterns: ReadonlyArray<readonly [string, RegExp]> = [
-    [
-      "third_party_pii",
-      /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b|(?<![\w+])(?:\+55)?\(?\d{2}\)?\s*\d{4,5}[- ]?\d{4}\b/,
-    ],
-    [
-      "secret_or_token",
-      /\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}|\b(?:senha|password|passwd|secret|token|api[_-]?key)\b\s*(?:[:=]|é|eh|e|seria|será|seja)\s*\S+/i,
-    ],
-    [
-      "file_path",
-      /[A-Za-z]:[\\/]|~[\\/]|\.\.[\\/]|\\\\[^\\]+\\|[\\/](?:Users|home|etc|var|tmp|root|opt|srv|private|\.ssh)[\\/]/i,
-    ],
+export function sensitiveContentCode(content: string): string | null {
+  // NFKC resolve fullwidth; o mapa resolve homóglifos cirílicos/gregos; os
+  // traços Unicode viram '-'. `flat` remove espaços para separadores gráficos.
+  const normalized = content
+    .normalize("NFKC")
+    .replace(/[\u2010-\u2015\u2212]/g, "-")
+    .replace(/[аеорсіјѕумктбнгхοαερικντχ]/g, (char) => HOMOGLYPHS[char] ?? char);
+  const flat = normalized.replace(/\s+/g, "");
+
+  const piiPatterns: ReadonlyArray<RegExp> = [
+    // E-mail estrutural: pega qualquer alfabeto depois da normalização.
+    /[^\s@]+@[^\s@]+\.[^\s@]{2,}/u,
+    // CPF: colado, pontuado, com espaços ou com traços em qualquer posição.
+    /\b\d{3}[.-]?\d{3}[.-]?\d{3}[.-]?\d{2}\b/,
+    // Telefone: exige +55, DDD entre parênteses, separador explícito ou 11 dígitos com 9.
+    /\+55\d{2}\d{4,5}[.-]?\d{4}/,
+    /\(\d{2}\)\d{4,5}[.-]?\d{4}/,
+    /\b\d{2}[.-]\d{4,5}[.-]?\d{4}\b/,
+    /\b\d{2}9\d{8}\b/,
   ];
 
-  for (const [code, pattern] of patterns) {
-    if (pattern.test(normalized)) {
-      return code;
+  for (const pattern of piiPatterns) {
+    if (pattern.test(flat)) {
+      return "third_party_pii";
     }
   }
 
-  // Report cru: presença de outcome e de caveats/effected em qualquer ordem e valor.
-  if (/"outcome"\s*:/i.test(normalized) && /"(?:caveats|effected)"\s*:/i.test(normalized)) {
+  const secretPattern =
+    /\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}|\b(?:senha|password|passwd|secret|segredo|chave|token|api[_-]?key|api\s+key)\b(?:\s+(?:de|da|do|api|key)){0,2}\s*(?:[:=]|é|eh|e|seria|será|seja)\s*\S+/i;
+
+  if (secretPattern.test(normalized)) {
+    return "secret_or_token";
+  }
+
+  const drivePattern = /\b[A-Za-z]:[\\/]?/;
+  const pathPattern = /~[\\/]|\.\.[\\/]|[\\/]{2}[^\\/\s]+[\\/]|[\\/][\w.~-]+[\\/]/;
+
+  if (drivePattern.test(normalized) || pathPattern.test(flat)) {
+    return "file_path";
+  }
+
+  // Report cru: chaves outcome e caveats/effected em qualquer ordem, aspas ou valor.
+  if (/\boutcome\b["']?\s*[:=]/i.test(normalized) &&
+      /\b(?:caveats|effected)\b["']?\s*[:=]/i.test(normalized)) {
     return "raw_report";
   }
 

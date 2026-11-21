@@ -265,6 +265,175 @@
         "campoExtra": "nao declarado"
       },
       "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-cpf-com-espacos",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-21",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Documento: 123 456 789-09."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-cpf-traco-unicode",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-22",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Documento: 000–000–000–00."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-telefone-com-pontos",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-23",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Telefone: (11) 99999.9999"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-telefone-com-hifen-no-ddd",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-24",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Telefone: 11-99999-9999"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-caminho-absoluto-generico",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-25",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em /usr/local/bin/chave"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-caminho-unc-com-barra",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-26",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em //servidor/compartilhado/x"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-drive-sem-separador",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-27",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em C:chave.txt"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-report-sem-aspas",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-28",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "outcome: succeeded, caveats: []"
+      },
+      "expect": { "ok": false, "reject": "raw_report", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-report-aspas-simples",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-29",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "{'outcome':'succeeded','caveats':[]}"
+      },
+      "expect": { "ok": false, "reject": "raw_report", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-chave-api-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-30",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "a chave API é abc123"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-token-composto-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-31",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "o token da API é abc123"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-email-homoglifo-cirilico",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-32",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "maria@ex\u0430mple.test"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m2-id-dez-digitos-benigno",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-33",
+        "tier": "M2",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Numeros de exemplo 1234567890"
+      },
+      "expect": { "ok": true }
     }
   ]
 }
