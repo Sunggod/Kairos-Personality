@@ -1,0 +1,398 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "executed",
+        "awaiting-approval"
+      ]
+    },
+    "origin": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "flow",
+            "planner"
+          ]
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "additionalProperties": {}
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "workspace": {
+      "type": "string",
+      "minLength": 1
+    },
+    "results": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "alias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {},
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "minLength": 1
+              },
+              "field": {
+                "type": "string"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "retryable",
+              "message"
+            ],
+            "additionalProperties": {}
+          },
+          "report": {
+            "type": "object",
+            "properties": {
+              "proto": {
+                "type": "string",
+                "const": "kairos/1"
+              },
+              "kind": {
+                "type": "string",
+                "const": "report"
+              },
+              "reportId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "taskId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "trace": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "node": {
+                "type": "string",
+                "minLength": 1
+              },
+              "nodeVersion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "schemaVersion": {
+                "type": "string",
+                "minLength": 1
+              },
+              "workspace": {
+                "type": "string",
+                "minLength": 1
+              },
+              "lang": {
+                "type": "string",
+                "minLength": 1
+              },
+              "outcome": {
+                "type": "string",
+                "enum": [
+                  "succeeded",
+                  "partial",
+                  "failed",
+                  "aborted"
+                ]
+              },
+              "headline": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confidence": {
+                "type": "string",
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ]
+              },
+              "did": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "effected": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "verb": {
+                      "type": "string"
+                    },
+                    "object": {
+                      "type": "string"
+                    },
+                    "reversible": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "verb",
+                    "object",
+                    "reversible"
+                  ],
+                  "additionalProperties": {}
+                }
+              },
+              "caveats": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "detailRef": {
+                "type": "string"
+              },
+              "synthetic": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "proto",
+              "kind",
+              "reportId",
+              "taskId",
+              "trace",
+              "node",
+              "nodeVersion",
+              "schemaVersion",
+              "workspace",
+              "lang",
+              "outcome",
+              "headline",
+              "did",
+              "effected"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "ok",
+          "alias"
+        ],
+        "additionalProperties": {}
+      }
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "proto": {
+          "type": "string",
+          "const": "kairos/1"
+        },
+        "kind": {
+          "type": "string",
+          "const": "report"
+        },
+        "reportId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "taskId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "node": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nodeVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schemaVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lang": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "succeeded",
+            "partial",
+            "failed",
+            "aborted"
+          ]
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "did": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "effected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "verb": {
+                "type": "string"
+              },
+              "object": {
+                "type": "string"
+              },
+              "reversible": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "verb",
+              "object",
+              "reversible"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "detailRef": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "proto",
+        "kind",
+        "reportId",
+        "taskId",
+        "trace",
+        "node",
+        "nodeVersion",
+        "schemaVersion",
+        "workspace",
+        "lang",
+        "outcome",
+        "headline",
+        "did",
+        "effected"
+      ],
+      "additionalProperties": {}
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "step": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "requestedAt": {
+          "type": "number"
+        },
+        "expiresAt": {
+          "type": "number"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        },
+        "approver": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "trace",
+        "workspace",
+        "step",
+        "reason",
+        "requestedAt",
+        "expiresAt"
+      ],
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "status",
+    "origin",
+    "trace",
+    "workspace",
+    "results"
+  ],
+  "additionalProperties": {},
+  "$id": "https://kairos-personality.local/schema/plan-run-result.json",
+  "title": "Kairos Brain plan.run Result"
+}

@@ -134,7 +134,7 @@ modelo abaixo.
 
 Índice das notas `[Decidido durante a implementação]` no estudo: data, seção, uma linha.
 
-(nenhuma ainda)
+- 2026-11-21 · D14 — filtro M2/M3 fail-closed: qualquer sequência de 10/11 dígitos é tratada como PII; trade-off de falso positivo registrado com 22 vetores de bypass. (pendência da F1)
 
 ---
 

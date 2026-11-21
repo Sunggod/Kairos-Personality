@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "intentKey": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "flow": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slots": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "intentKey",
+    "trace",
+    "flow",
+    "slots",
+    "createdAt"
+  ],
+  "additionalProperties": false,
+  "$id": "https://kairos-personality.local/schema/intention-record.json",
+  "title": "Kairos Personality Intention Record"
+}

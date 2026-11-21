@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "number",
+      "const": 1
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "flow": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "running",
+        "awaiting-approval",
+        "executed",
+        "failed",
+        "cancelled",
+        "unknown"
+      ]
+    },
+    "intentKey": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "createdAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updatedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [
+            "succeeded",
+            "partial",
+            "failed",
+            "aborted"
+          ]
+        },
+        {
+          "type": "string",
+          "const": "unknown"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "trace",
+    "taskId",
+    "flow",
+    "state",
+    "intentKey",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false,
+  "$id": "https://kairos-personality.local/schema/task-record.json",
+  "title": "Kairos Personality Task Record"
+}

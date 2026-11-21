@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "proto": {
+      "type": "string",
+      "const": "kairos/1"
+    },
+    "kind": {
+      "type": "string",
+      "const": "report"
+    },
+    "reportId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "taskId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "node": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodeVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lang": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "succeeded",
+        "partial",
+        "failed",
+        "aborted"
+      ]
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "did": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "effected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "verb": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "reversible": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "verb",
+          "object",
+          "reversible"
+        ],
+        "additionalProperties": {}
+      }
+    },
+    "caveats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "detailRef": {
+      "type": "string"
+    },
+    "synthetic": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "proto",
+    "kind",
+    "reportId",
+    "taskId",
+    "trace",
+    "node",
+    "nodeVersion",
+    "schemaVersion",
+    "workspace",
+    "lang",
+    "outcome",
+    "headline",
+    "did",
+    "effected"
+  ],
+  "additionalProperties": {},
+  "$id": "https://kairos-personality.local/schema/brain-report.json",
+  "title": "Kairos Brain Report"
+}

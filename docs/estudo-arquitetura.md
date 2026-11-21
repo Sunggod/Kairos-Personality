@@ -525,6 +525,13 @@ Custo assumido: manter o campo `tier` sincronizado com o `flows/` do Brain no `c
 
 **Filtro de escrita determinístico.** Segredo, token, senha, caminho de arquivo e conteúdo de Report **não entram** em M2/M3. É o que impede "guardar tudo" de virar "guardar o que um nó injetou" (R26).
 
+> **Revisão — 2026-11-21 — [Decidido durante a implementação]** (D14, R26, P14)
+> **O que mudou:** o filtro determinístico trata **qualquer sequência de 10 ou 11 dígitos** em M2/M3 como PII de terceiro (CPF/telefone), com normalização Unicode e detecção estrutural de e-mail, caminho, Report e credencial. Nenhuma nova regra de produto: é o fail-closed da regra existente.
+> **Evidência:** cinco rodadas de revisão independente; 22 variações de bypass encontradas e fechadas. Vetores em `packages/schema/vectors/memory-record.json` (por exemplo `memoria-m3-id-dez-digitos-fail-closed`, `memoria-m3-telefone-com-dd`, `memoria-m3-report-escapado`).
+> **Alternativas descartadas:** whitelist de formatos de CPF/telefone (burrada por separadores, parênteses e Unicode); confiar no LLM para classificar (P8/P12); aceitar formatação estrita e correr o risco de PII entrar.
+> **Consequência:** um ID longo legítimo pode ser descartado de M2/M3 (falso positivo aceito); PII de terceiro não entra. A barreira de estrutura (tombstone sem conteúdo) permanece separada e resistiu sem ressalvas.
+> **Fase(s) afetada(s):** F1 (entrega `MemoryRecord`), F3 (`MemoryGate`).
+
 **Orçamento de contexto por turno:** `persona` (prefixo, cache de KV do D2) + `working` inteiro + últimos N turnos de `episodic` + top-k de `semantic` **só se passar do limiar**. `procedural` não entra na v1. Retrieval com **embeddings locais em CPU** — não competem com o LLM na GPU (D10).
 
 **Fronteira com P8:** `affect` é store separado, nunca lido como fato; memória nunca escreve em `affect`.

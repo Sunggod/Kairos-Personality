@@ -1,0 +1,50 @@
+{
+  "schema": "brain-request-envelope",
+  "vectors": [
+    {
+      "id": "envelope-brain-valido",
+      "input": {
+        "proto": "kairos/1",
+        "id": "req_1",
+        "trace": "trace_f2_01",
+        "from": "kairos-personality",
+        "to": "kairos-brain",
+        "kind": "request",
+        "cap": "plan.run",
+        "acceptLang": "en",
+        "schemaVersion": "1.0",
+        "payload": { "workspace": "f2", "flow": "two-step", "objective": "teste" }
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "envelope-brain-sem-trace",
+      "input": {
+        "proto": "kairos/1",
+        "id": "req_2",
+        "from": "kairos-personality",
+        "to": "kairos-brain",
+        "kind": "request",
+        "cap": "plan.run",
+        "schemaVersion": "1.0",
+        "payload": { "workspace": "f2" }
+      },
+      "expect": { "ok": false, "reject": "trace_required", "path": "trace" }
+    },
+    {
+      "id": "envelope-brain-proto-errado",
+      "input": {
+        "proto": "kairos/2",
+        "id": "req_3",
+        "trace": "trace_f2_03",
+        "from": "kairos-personality",
+        "to": "kairos-brain",
+        "kind": "request",
+        "cap": "plan.run",
+        "schemaVersion": "1.0",
+        "payload": { "workspace": "f2" }
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "proto" }
+    }
+  ]
+}

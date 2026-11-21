@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "proto": {
+      "type": "string",
+      "const": "kairos/1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "from": {
+      "type": "string",
+      "minLength": 1
+    },
+    "to": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "const": "request"
+    },
+    "cap": {
+      "type": "string",
+      "minLength": 1
+    },
+    "acceptLang": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "payload": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "proto",
+    "id",
+    "trace",
+    "from",
+    "to",
+    "kind",
+    "cap",
+    "schemaVersion",
+    "payload"
+  ],
+  "additionalProperties": {},
+  "$id": "https://kairos-personality.local/schema/brain-request-envelope.json",
+  "title": "Kairos Brain Request Envelope"
+}

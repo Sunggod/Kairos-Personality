@@ -1,0 +1,47 @@
+{
+  "schema": "task-record",
+  "vectors": [
+    {
+      "id": "tarefa-valida",
+      "input": {
+        "schemaVersion": 1,
+        "trace": "trace_f2_10",
+        "taskId": "tsk_1",
+        "flow": "two-step",
+        "state": "running",
+        "intentKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "createdAt": "2026-11-21T12:00:00Z",
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": true }
+    },
+    {
+      "id": "tarefa-estado-invalido",
+      "input": {
+        "schemaVersion": 1,
+        "trace": "trace_f2_11",
+        "taskId": "tsk_2",
+        "flow": "two-step",
+        "state": "done",
+        "intentKey": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "createdAt": "2026-11-21T12:00:00Z",
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "state" }
+    },
+    {
+      "id": "tarefa-chave-intencao-invalida",
+      "input": {
+        "schemaVersion": 1,
+        "trace": "trace_f2_12",
+        "taskId": "tsk_3",
+        "flow": "two-step",
+        "state": "unknown",
+        "intentKey": "abc",
+        "createdAt": "2026-11-21T12:00:00Z",
+        "updatedAt": "2026-11-21T12:00:00Z"
+      },
+      "expect": { "ok": false, "reject": "schema_rejection", "path": "intentKey" }
+    }
+  ]
+}

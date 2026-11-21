@@ -4,5 +4,7 @@ export * from "./persona";
 export * from "./memory";
 export * from "./working";
 export * from "./delegation";
+export * from "./brain";
+export * from "./tasks";
 export * from "./vectors";
 export * from "./pins";

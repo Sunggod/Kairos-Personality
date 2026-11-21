@@ -5,12 +5,14 @@ import { z } from "zod";
 import {
   affectStateSchema,
   autoWriteSchema,
+  brainRequestEnvelopeSchema,
   delegationEntrySchema,
   lockedWriteSchema,
   memoryRecordSchema,
   parseVectorFile,
   personaLayersSchema,
   runVector,
+  taskRecordSchema,
   vectorsFromFile,
   workingFrameSchema,
   type VectorWithSchema,
@@ -24,6 +26,8 @@ const vectorSchemas: Record<string, z.ZodType> = {
   "memory-record": memoryRecordSchema,
   "working-frame": workingFrameSchema,
   "delegation-entry": delegationEntrySchema,
+  "brain-request-envelope": brainRequestEnvelopeSchema,
+  "task-record": taskRecordSchema,
 };
 
 const vectorsDir = fileURLToPath(new URL("../vectors/", import.meta.url));

@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { affectStateSchema } from "./affect";
 import {
+  brainReportSchema,
+  brainRequestEnvelopeSchema,
+  planRunResultSchema,
+} from "./brain";
+import {
   delegationEntrySchema,
   delegationsFileSchema,
 } from "./delegation";
@@ -11,6 +16,7 @@ import {
   personaLayersSchema,
 } from "./persona";
 import { modelsLockSchema, runtimeLockSchema } from "./pins";
+import { intentionRecordSchema, taskRecordSchema } from "./tasks";
 import { workingFrameSchema } from "./working";
 
 const draft = "https://json-schema.org/draft/2020-12/schema" as const;
@@ -78,6 +84,31 @@ export const jsonSchemas = {
     delegationsFileSchema,
     "Kairos Personality Delegations File",
     "https://kairos-personality.local/schema/delegations-file.json",
+  ),
+  "brain-request-envelope": toSchema(
+    brainRequestEnvelopeSchema,
+    "Kairos Brain Request Envelope",
+    "https://kairos-personality.local/schema/brain-request-envelope.json",
+  ),
+  "brain-report": toSchema(
+    brainReportSchema,
+    "Kairos Brain Report",
+    "https://kairos-personality.local/schema/brain-report.json",
+  ),
+  "plan-run-result": toSchema(
+    planRunResultSchema,
+    "Kairos Brain plan.run Result",
+    "https://kairos-personality.local/schema/plan-run-result.json",
+  ),
+  "task-record": toSchema(
+    taskRecordSchema,
+    "Kairos Personality Task Record",
+    "https://kairos-personality.local/schema/task-record.json",
+  ),
+  "intention-record": toSchema(
+    intentionRecordSchema,
+    "Kairos Personality Intention Record",
+    "https://kairos-personality.local/schema/intention-record.json",
   ),
 } as const;
 
