@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "models": {
+    "qwen3.5-4b-q4_k_m": {
+      "file": "models/Qwen3.5-4B-Q4_K_M.gguf",
+      "sha256": "00FE7986FF5F6B463E62455821146049DB6F9313603938A70800D1FB69EF11A4",
+      "size": 2740937888,
+      "role": "s7-test",
+      "source": "https://huggingface.co/unsloth/Qwen3.5-4B-GGUF/resolve/main/Qwen3.5-4B-Q4_K_M.gguf",
+      "provisional": true,
+      "note": "Carga de teste do S7. O S5 escolhe o modelo final e aplica a regra de conversao local do D16."
+    }
+  }
+}

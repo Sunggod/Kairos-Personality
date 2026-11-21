@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "runtime": "llama.cpp",
+  "release": "v1.0.0",
+  "build": "b12359",
+  "commit": "b1b770d90d94cad9e9ea5b993bdbc383a522fb28",
+  "platform": "windows-x64-cuda-12.4",
+  "archiveDir": "runtime/archives",
+  "installDir": "runtime/llama-b12359",
+  "archives": {
+    "llama": {
+      "file": "llama-b12359-bin-win-cuda-12.4-x64.zip",
+      "sha256": "E9C0ABF442E8339C06728366C1AD2C711332F9939C0C00603FB75D85FD44C914",
+      "size": 318976332
+    },
+    "cudart": {
+      "file": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+      "sha256": "8C79A9B226DE4B3CACFD1F83D24F962D0773BE79F1E7B75C6AF4DED7E32AE1D6",
+      "size": 391443627
+    }
+  },
+  "binaries": {
+    "llama-server.exe": {
+      "sha256": "38C5AFFB81C9A8F88F5538C7D11BC445E13BC46A2C6EDA05694B8B31A8D45995",
+      "size": 9728
+    },
+    "llama-server-impl.dll": {
+      "sha256": "C81C23738405831CACDA737E64CE8F08870D4F44BEB63E3AA9515B3AD2E4286E",
+      "size": 10343424
+    },
+    "llama-common.dll": {
+      "sha256": "A0E0B993DEDE7C95EB1CA79CDCC2A003F2F79FF59FC129CB46EC5DAAC80FD057",
+      "size": 8507904
+    },
+    "llama.dll": {
+      "sha256": "17B0063B06C4561F46929A809A60BF60C857783BB22F593528145CC1E1108D7D",
+      "size": 3868672
+    },
+    "mtmd.dll": {
+      "sha256": "558D7C41475CC6F54D6DA41EEA23876CD35CFD2E9D8F2B3E637B8C49C9928ED5",
+      "size": 2244096
+    },
+    "ggml.dll": {
+      "sha256": "92B081CFB031E2EFE5CD2A8C71C872E8A92CB1D4A43619AD6614DC30AD357B80",
+      "size": 78848
+    },
+    "ggml-base.dll": {
+      "sha256": "20E4986EC6FD88EB61630433FF172E08885F8FECFBD0C1960A5D55C8854019E3",
+      "size": 832000
+    },
+    "ggml-cuda.dll": {
+      "sha256": "2B33FF95778DE0CD4D1D8E0C3A07DF13D3893ABCCD57BF57A7EACE92DE2ABA71",
+      "size": 681820672
+    },
+    "ggml-cpu-alderlake.dll": {
+      "sha256": "F4BD2A5BD4C99669A5EFCBC0EDF5326C6F51CF556C3301AE5C8FC2994B913440",
+      "size": 1459200
+    },
+    "ggml-cpu-cannonlake.dll": {
+      "sha256": "B6A69981682C6E9DFB5FEFCFC3677B9E17C112C3C33FC9D59405DAA618E63304",
+      "size": 1692160
+    },
+    "ggml-cpu-cascadelake.dll": {
+      "sha256": "488337FB896AC54EC8A74A5E8163B48D8EC4C8E082DA4BBB62EBE52139D3B3D8",
+      "size": 1666048
+    },
+    "ggml-cpu-cooperlake.dll": {
+      "sha256": "7D30660F15D288D6DA7C1D99AE8418C46F61D1D5036E0082AAD6FBF4E461D2BB",
+      "size": 1675264
+    },
+    "ggml-cpu-haswell.dll": {
+      "sha256": "26DBCF80225FE3C56AA750501247CEBDC99B791F323C33D0D8FCD2ED7C4BAFCB",
+      "size": 1464320
+    },
+    "ggml-cpu-icelake.dll": {
+      "sha256": "0A35F7A655BB74CE2D64CBB64E6817B17F62964B060C6A503D3267B2133199BC",
+      "size": 1672192
+    },
+    "ggml-cpu-ivybridge.dll": {
+      "sha256": "2E83B2AA5AD108445A599FCDD46FAFCB227A3D2D66743994434B0BCAACB5A714",
+      "size": 1345536
+    },
+    "ggml-cpu-piledriver.dll": {
+      "sha256": "851474816A574847B264E018DE02410F5905359934C2FA2411F7FF3D7706620C",
+      "size": 1338880
+    },
+    "ggml-cpu-sandybridge.dll": {
+      "sha256": "86B1C9114249492B8D39A1A3D9F9717C8969334A4BD12C279B91248A553CB254",
+      "size": 1314304
+    },
+    "ggml-cpu-sapphirerapids.dll": {
+      "sha256": "B049B5672C3C246BB320EC011C735981628A9369687CFD64A4628C5BAD238B3B",
+      "size": 1952256
+    },
+    "ggml-cpu-skylakex.dll": {
+      "sha256": "183413744426F596C67FB206DAF2CAB17D666E22076E4A6B9A25D301DE871D85",
+      "size": 1686016
+    },
+    "ggml-cpu-sse42.dll": {
+      "sha256": "5B2F04B3AB1E76B09D887C496EB61B09A0EE4FC77B28C0602E45411906946CCD",
+      "size": 937472
+    },
+    "ggml-cpu-x64.dll": {
+      "sha256": "375434294CB7D22DE0BF5DA68FE67569FB5F8CA2C11E925850C8BE3F52D052FE",
+      "size": 930304
+    },
+    "ggml-cpu-zen4.dll": {
+      "sha256": "DAE5D12772F0213B6D70A3C4DB032146B504DEA32B1B35BBCC9DFF769EDF57F7",
+      "size": 1681920
+    },
+    "cudart64_12.dll": {
+      "sha256": "D28E42265DA7462162A54DA6B7A99EA4FA2CAF8139D862BB500DB875D0B32DFC",
+      "size": 553984
+    },
+    "cublas64_12.dll": {
+      "sha256": "E40202FE4223C1CD2D2DCE7BEEC59E1ED61C7801BD827309183BE9B50E358F4C",
+      "size": 100033536
+    },
+    "cublasLt64_12.dll": {
+      "sha256": "2A896460BEF60ED57EF32B0875812F355A6984E671D638BB632F5E8C1D7A831F",
+      "size": 473551360
+    },
+    "libomp.dll": {
+      "sha256": "A12116BA72D1D6820407CF30BE23DA04CE79D6BB8A71A5EE71759C5A1FAA6F1C",
+      "size": 768000
+    }
+  }
+}
