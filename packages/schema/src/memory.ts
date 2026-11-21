@@ -62,6 +62,7 @@ export function sensitiveContentCode(content: string): string | null {
   }
 
   if (/(?:^|[^\w])[\\/][\w.~-]+/.test(normalized) ||
+      /[\w.-]+[\\/][\w.-]+\.[A-Za-z0-9]{1,5}/.test(normalized) ||
       /(?:\.\.|~)[\\/]/.test(flat) ||
       /[\\/]{2}[^\\/\s]+[\\/]/.test(flat)) {
     return "file_path";

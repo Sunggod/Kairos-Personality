@@ -538,6 +538,32 @@
         "content": "a: prefiro cafe"
       },
       "expect": { "ok": true }
+    },
+    {
+      "id": "memoria-m3-caminho-relativo-com-extensao",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-42",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "config/app.json"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-id-dez-digitos-fail-closed",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-43",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Numeros de exemplo 1234567890"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
     }
   ]
 }
