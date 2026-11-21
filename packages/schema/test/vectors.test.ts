@@ -75,6 +75,25 @@ describe("vetores de contrato", () => {
     }
   });
 
+  it("cobre os casos exigidos pelo roadmap da F1", async () => {
+    const required = [
+      "persona-valida",
+      "auto-write-floors-reprovado",
+      "afeto-valido",
+      "afeto-fora-do-intervalo",
+      "delegacao-sem-tier",
+      "delegacao-sensitive-sem-slots",
+      "memoria-m3-pii-email-terceiro",
+      "tombstone-sem-conteudo",
+      "tombstone-com-conteudo",
+    ];
+    const ids = (await loadVectors()).map((vector) => vector.id);
+
+    for (const id of required) {
+      expect(ids, id).toContain(id);
+    }
+  });
+
   it("metade dos vetores e de rejeicao", async () => {
     const vectors = await loadVectors();
     const rejections = vectors.filter((vector) => !vector.expect.ok).length;
