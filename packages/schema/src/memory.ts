@@ -21,26 +21,33 @@ export type MemoryOrigin = z.infer<typeof memoryOriginSchema>;
  * Os padrões são sintéticos por construção: nenhum dado real é necessário.
  */
 export function sensitiveContentCode(content: string): string | null {
+  // Ofuscação Unicode (por exemplo, @ e . fullwidth) não pode burlar o filtro.
+  const normalized = content.normalize("NFKC");
+
   const patterns: ReadonlyArray<readonly [string, RegExp]> = [
     [
       "third_party_pii",
-      /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|(?:\+55\s?)?\(?\d{2}\)?\s+\d{4,5}[- ]?\d{4}\b/,
+      /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b|(?<![\w+])(?:\+55)?\(?\d{2}\)?\s*\d{4,5}[- ]?\d{4}\b/,
     ],
     [
       "secret_or_token",
-      /\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}|\b(?:senha|password|passwd|secret|token|api[_-]?key)\s*[:=]\s*\S+/i,
+      /\b(?:sk|rk|ghp|gho|github_pat|xox[baprs]|AKIA)[-_][A-Za-z0-9_-]{10,}|\b(?:senha|password|passwd|secret|token|api[_-]?key)\b\s*(?:[:=]|é|eh|e|seria|será|seja)\s*\S+/i,
     ],
-    ["file_path", /[A-Za-z]:\\|[\\/](?:Users|home|etc|var)[\\/]/i],
     [
-      "raw_report",
-      /"outcome"\s*:\s*"(?:succeeded|partial|failed|aborted|synthetic)"[\s\S]*"caveats"/i,
+      "file_path",
+      /[A-Za-z]:[\\/]|~[\\/]|\.\.[\\/]|\\\\[^\\]+\\|[\\/](?:Users|home|etc|var|tmp|root|opt|srv|private|\.ssh)[\\/]/i,
     ],
   ];
 
   for (const [code, pattern] of patterns) {
-    if (pattern.test(content)) {
+    if (pattern.test(normalized)) {
       return code;
     }
+  }
+
+  // Report cru: presença de outcome e de caveats/effected em qualquer ordem e valor.
+  if (/"outcome"\s*:/i.test(normalized) && /"(?:caveats|effected)"\s*:/i.test(normalized)) {
+    return "raw_report";
   }
 
   return null;

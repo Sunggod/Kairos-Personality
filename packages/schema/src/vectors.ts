@@ -32,21 +32,41 @@ export interface VectorResult {
 
 export type VectorWithSchema = Vector & { readonly schema: string };
 
-/** Motivo estável: o código vem prefixado na mensagem do Zod quando é uma recusa nomeada. */
-export function rejectionReason(error: z.ZodError): string {
+export interface Rejection {
+  code: string;
+  path?: string;
+}
+
+type ZodIssueLike = z.ZodError["issues"][number];
+
+function pathOf(issue: ZodIssueLike): string {
+  return issue.path.join(".");
+}
+
+function withPath(code: string, issue: ZodIssueLike): Rejection {
+  const path = pathOf(issue);
+  return path.length > 0 ? { code, path } : { code };
+}
+
+/**
+ * Motivo estável: o código vem prefixado na mensagem do Zod quando é uma
+ * recusa nomeada. O caminho devolvido é o da mesma issue que deu o motivo,
+ * para não casar razão de um erro com campo de outro.
+ */
+export function rejectionReason(error: z.ZodError): Rejection {
   for (const issue of error.issues) {
     const match = /^([a-z][a-z0-9_]*):/.exec(issue.message);
     if (match?.[1]) {
-      return match[1];
+      return withPath(match[1], issue);
     }
   }
 
   for (const issue of error.issues) {
     if (issue.code === "unrecognized_keys") {
-      if (issue.keys.includes("content")) {
-        return "tombstone_with_content";
-      }
-      return "unknown_field";
+      const code = issue.keys.includes("content")
+        ? "tombstone_with_content"
+        : "unknown_field";
+      return withPath(code, issue);
     }
   }
 
@@ -56,15 +76,16 @@ export function rejectionReason(error: z.ZodError): string {
   ];
 
   for (const issue of error.issues) {
-    const path = issue.path.join(".");
+    const path = pathOf(issue);
     for (const [fragment, code] of pathFallbacks) {
       if (path === fragment || path.endsWith("." + fragment)) {
-        return code;
+        return withPath(code, issue);
       }
     }
   }
 
-  return "schema_rejection";
+  const first = error.issues[0];
+  return first ? withPath("schema_rejection", first) : { code: "schema_rejection" };
 }
 
 export function runVector(vector: Vector, schema: z.ZodType): VectorResult {
@@ -74,13 +95,12 @@ export function runVector(vector: Vector, schema: z.ZodType): VectorResult {
     return { ok: true };
   }
 
-  const first = parsed.error.issues[0];
-  const path = first?.path.join(".") || "";
+  const rejection = rejectionReason(parsed.error);
 
   return {
     ok: false,
-    reason: rejectionReason(parsed.error),
-    ...(path.length > 0 ? { path } : {}),
+    reason: rejection.code,
+    ...(rejection.path ? { path: rejection.path } : {}),
   };
 }
 

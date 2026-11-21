@@ -147,6 +147,124 @@
         "content": "Preferencia sintetica."
       },
       "expect": { "ok": false, "reject": "schema_version", "path": "schemaVersion" }
+    },
+    {
+      "id": "memoria-m3-cpf-sem-pontuacao",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-12",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Documento de exemplo: 12345678909."
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-telefone-colado",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-13",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Telefone: (11)99999-9999"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-telefone-com-dd",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-14",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Contato +5511999999999"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-caminho-unix",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-15",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em /tmp/chave.pem"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-caminho-unc",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-16",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "Arquivo em \\\\servidor\\compartilhado\\arquivo.txt"
+      },
+      "expect": { "ok": false, "reject": "file_path", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-report-chaves-invertidas",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-17",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "persona",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "{\"caveats\":[],\"outcome\":\"succeeded\"}"
+      },
+      "expect": { "ok": false, "reject": "raw_report", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-senha-em-prosa",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-18",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "a senha é Exemplo123!"
+      },
+      "expect": { "ok": false, "reject": "secret_or_token", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-email-fullwidth",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-19",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "contato ｍａｒｉａ＠ｅｘａｍｐｌｅ．ｔｅｓｔ"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
+    },
+    {
+      "id": "memoria-m3-pii-e-campo-extra",
+      "input": {
+        "schemaVersion": 1,
+        "id": "mem-p2-exemplo-20",
+        "tier": "M3",
+        "kind": "content",
+        "origin": "user",
+        "createdAt": "2026-11-21T10:00:00Z",
+        "content": "maria.silva@example.test",
+        "campoExtra": "nao declarado"
+      },
+      "expect": { "ok": false, "reject": "third_party_pii", "path": "content" }
     }
   ]
 }
