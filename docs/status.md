@@ -4,18 +4,18 @@ Andamento, handoff e registro de gate. **O roadmap é a especificação e não �
 registrar andamento; este arquivo é.** Todo agente lê isto primeiro e atualiza ao terminar a
 sessão.
 
-Atualizado em: 2026-11-21 · por: sessão de planejamento (nenhum código existe ainda)
+Atualizado em: 2026-11-21 · por: agente de implementação (F0 fechada)
 
 ---
 
 ## Onde estamos
 
-- **Fase em curso:** nenhuma. Documentação pronta: `estudo-arquitetura.md` (v3.2),
-  `roadmap.md` (F0–F7, spikes S1–S9, temas transversais), `AGENTS.md` e skills.
-- **Próxima ação:** abrir a **F0**, começando pelo **S7** (hardening do runtime), que decide
-  qual build do `llama-server` o manifesto de pins vai fixar. Em paralelo, e sem depender de
-  nada: **S5** (modelo) e o que o responsável precisar julgar cedo (S1/S2).
-- **Bloqueado por:** nada para a F0 até a F5. Pendências 1 e 3 só antes da F6a e da F6c.
+- **Fase em curso:** nenhuma. **F0 Fundação fechada** com gate verde em 2026-11-21; S7
+  concluído (`docs/spikes/S7-hardening-runtime.md`).
+- **Próxima ação:** abrir a **F1** (contrato interno), começando pelos schemas de persona,
+  memória, afeto e delegação em `packages/schema`, com `contract-first`. Em paralelo: **S5**
+  (modelo) antes da F4; S1/S2/S6 antes da F5.
+- **Bloqueado por:** nada para a F1. Pendências 1 e 3 só antes da F6a e da F6c.
 
 ---
 
@@ -69,7 +69,7 @@ Estado: `não iniciado` · `em curso` · `concluído` (relatório em `docs/spike
 
 | Fase | Estado | Gate | Commit | Data |
 |---|---|---|---|---|
-| F0 Fundação | não iniciada | — | — | — |
+| F0 Fundação | concluída | verde | 901119b | 2026-11-21 |
 | F1 Contrato interno | não iniciada | — | — | — |
 | F2 Cliente do Brain | não iniciada | — | — | — |
 | F3 Emoção, persona e memória | não iniciada | — | — | — |
@@ -100,7 +100,19 @@ modelo abaixo.
 - Itens que não foram verificados: <lista — "nenhum" só se for verdade>
 ```
 
-(Nenhuma fase foi fechada ainda.)
+### F0 — Fundação — 2026-11-21
+
+- Commit: 901119b (S7 em 8206bc1; entregas em bf5ee03, 2982362, 35f2af6, f81b071, 901119b)   Máquina: piso   Build pinado: `runtime.lock.json` (b12359 / b1b770d9) + `models.lock.json` (Qwen3.5-4B-Q4_K_M, provisório até o S5)
+- bun install && bunx tsc --noEmit && bun test: verde do zero; 23 testes em 6 arquivos, 44 asserções
+- Comandos do gate da fase:
+    bun install (do zero): quatro workspaces (apps/personality-core, apps/avatar-client, packages/schema, scripts); bun.lock idêntico ao versionado
+    bun run verify:runtime-pins: 29 pins OK (2 archives, 26 binários, 1 GGUF)
+    bun run gen:schema: 2 JSON Schemas gerados; git diff vazio
+    CI GitHub (job verify): verde no push de 901119b; PR de prova com teste falso ficou BLOCKED e o merge foi recusado pela branch protection; PR fechado e branch removida
+- Medições (se houver): S7 — bind só 127.0.0.1, 401 sem chave, 400 em `dry_allowed_length=INT32_MIN`, 678 → 3584 MiB de VRAM no piso → relatório: `docs/spikes/S7-hardening-runtime.md`
+- Itens manuais registrados: `tsc --noEmit` reprovou uma sonda de tipo em cada um dos quatro workspaces (removidas); config local (`data/config.local.json`), chave em `secrets/` e GGUF em `models/` não aparecem no `git status`; `--sleep-idle-seconds` ausente da linha de comando
+- Desvios do estudo ou do Fluxo: nenhum. Extensão local: `runtime/` adicionado ao `.gitignore` para não versionar os 56 arquivos do bundle; `scripts/` virou workspace para fechar os quatro espaços do aceite
+- Itens que não foram verificados: fuzzing da API C / GGUF malicioso, soak de estabilidade e orçamento formal de VRAM (S3/F7); transição real de sleep (P10 proíbe a flag); CVEs de JNI Android (não estão no artefato Windows)
 
 ---
 
@@ -132,6 +144,16 @@ Mais recente primeiro. Cada sessão termina com uma entrada.
 - Próxima ação: <uma frase>
 - Perguntas ao responsável: <lista ou "nenhuma">
 ```
+
+### 2026-11-21 — agente de implementação (F0)
+- Feito: S7 concluído e publicado (8206bc1); F0 inteira entregue em cinco commits (bf5ee03
+  workspace/tsconfig/avatar, 2982362 config Zod, 35f2af6 logger com trace, f81b071 pins e
+  verify:runtime-pins, 901119b CI) e publicada. Gate verde; branch protection exige o check
+  `verify` e foi provada com um PR de teste falho bloqueado, depois fechado.
+- Ficou pendente: o GGUF pinado é provisório até o S5; homologação das revisões v3.1/v3.2
+  (pendência 1) só antes da F6a; S1/S2/S6 e S3/S5 ficam para as fases seguintes.
+- Próxima ação: abrir a F1 com `contract-first`, sem iniciar a F6a antes da homologação.
+- Perguntas ao responsável: nenhuma para a F1 (pendências 1 e 3 seguem adiadas pela triagem).
 
 ### 2026-11-21 (entrega do workspace) — Claude, sessão de planejamento
 - Feito: pendências triadas (só as essenciais mantidas); referências ao avatar descartado
