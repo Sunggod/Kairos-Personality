@@ -155,14 +155,14 @@ export function createDelegate(deps: DelegateDeps) {
       }
 
       // P11: intenção e tarefa gravadas ANTES do plan.run.
-      const taskId = "tsk_" + key.slice(0, 12);
-      deps.tasks.begin({
+      const started = deps.tasks.begin({
         trace: input.trace,
-        taskId,
+        taskId: "tsk_" + key.slice(0, 12),
         flow: input.flow,
         intentKey: key,
         slots: JSON.stringify(input.slots),
       });
+      const taskId = started.taskId;
 
       try {
         const result = await deps.client.planRun({

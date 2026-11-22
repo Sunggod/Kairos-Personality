@@ -1,6 +1,10 @@
 import { describe, expect, it } from "bun:test";
 import { spawnSync } from "node:child_process";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { TaskStore } from "../src/task-store";
 
 const mainPath = fileURLToPath(new URL("../src/main.ts", import.meta.url));
 
@@ -36,14 +40,50 @@ describe("boot", () => {
 
     expect(result.status).toBe(0);
 
-    const line = result.stdout.trim().split("\n")[0];
+    const entries = result.stdout
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0)
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
+    const boot = entries.find((entry) => entry["event"] === "boot");
 
-    if (line === undefined || line.length === 0) {
+    if (boot === undefined) {
       throw new Error("boot não escreveu log");
     }
 
-    const entry = JSON.parse(line) as Record<string, unknown>;
-    expect(entry.event).toBe("boot");
-    expect(entry.service).toBe("personality-core");
+    expect(boot["service"]).toBe("personality-core");
+  });
+
+  it("no boot, tarefa running de processo morto vira unknown", async () => {
+    const root = await mkdtemp(join(tmpdir(), "kairos-boot-recovery-"));
+    const dbPath = join(root, "tasks.sqlite");
+    const store = new TaskStore({ path: dbPath });
+    store.begin({
+      trace: "trace_boot_recovery",
+      taskId: "tsk_boot_recovery",
+      flow: "two-step",
+      intentKey: "1".repeat(64),
+      slots: "{}",
+    });
+    store.close();
+
+    try {
+      const result = spawnSync(process.execPath, [mainPath], {
+        encoding: "utf8",
+        env: cleanEnv({ KAIROS_PERSONALITY_TASKS_DB: dbPath }),
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('"event":"tasks.recovered","count":1');
+
+      const reopened = new TaskStore({ path: dbPath });
+      try {
+        expect(reopened.get("trace_boot_recovery", "tsk_boot_recovery")?.state).toBe("unknown");
+      } finally {
+        reopened.close();
+      }
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

@@ -259,7 +259,11 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
                 .map((line) => line.slice(5).trimStart())
                 .join("\n");
               separator = buffer.indexOf("\n\n");
-              if (data.length === 0 || data.startsWith("[")) continue;
+              if (data.length === 0) continue;
+              if (data.startsWith("[")) {
+                options.onDiscarded?.("evento em lote não suportado");
+                continue;
+              }
               try {
                 const raw: unknown = JSON.parse(data);
                 const parsed = streamEventEnvelopeSchema.safeParse(raw);

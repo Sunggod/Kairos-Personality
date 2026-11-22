@@ -112,6 +112,14 @@ export class TaskStore {
       throw new Error("intenção já registrada");
     }
 
+    const existing = this.#db
+      .query("SELECT task_id FROM tasks WHERE intent_key = ?")
+      .all(input.intentKey) as Array<{ task_id: string }>;
+    const taskId =
+      existing.length === 0
+        ? input.taskId
+        : input.taskId + "_" + String(existing.length + 1);
+
     const at = this.#now();
     const intention = intentionRecordSchema.parse({
       schemaVersion: this.#schemaVersion,
@@ -124,7 +132,7 @@ export class TaskStore {
     const record = taskRecordSchema.parse({
       schemaVersion: this.#schemaVersion,
       trace: input.trace,
-      taskId: input.taskId,
+      taskId,
       flow: input.flow,
       state: "running",
       intentKey: input.intentKey,

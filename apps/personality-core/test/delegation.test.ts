@@ -353,6 +353,61 @@ describe("delegate", () => {
     ).not.toBe(intentKey({ turnId: "t", flow: "f", slots: normal }));
   });
 
+  it("retry autorizado com o mesmo trace cria nova task e novo plan.run", async () => {
+    const root = await mkdtemp(join(tmpdir(), "kairos-delegate-retry-"));
+    const tasks = new TaskStore({ path: join(root, "tasks.sqlite") });
+    let calls = 0;
+    const delegate = createDelegate({
+      client: fakeClient({
+        async planRun() {
+          calls += 1;
+          return {
+            status: "awaiting-approval" as const,
+            origin: { kind: "flow" as const, name: "two-step" },
+            trace,
+            workspace: "f2-unit",
+            results: [],
+            approval: {
+              id: "appr_retry",
+              trace,
+              workspace: "f2-unit",
+              step: "inspect",
+              reason: "teste",
+              requestedAt: 1,
+              expiresAt: 2,
+            },
+          };
+        },
+      }),
+      tasks,
+      delegations: setup().delegations,
+      workspace: "f2-unit",
+      log: { info() {} },
+    });
+
+    try {
+      const input = {
+        turnId: "turn_retry",
+        trace,
+        flow: "two-step",
+        slots: { objective: "teste" },
+        origin: "user" as const,
+      };
+      const first = await delegate.delegate(input);
+      expect(first.status).toBe("awaiting-approval");
+
+      tasks.recoverNonTerminal();
+      tasks.releaseIntention(first.intentKey);
+
+      const second = await delegate.delegate(input);
+      expect(second.status).toBe("awaiting-approval");
+      expect(calls).toBe(2);
+    } finally {
+      tasks.close();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("aprovação exige pedido entregue e token de UI", async () => {
     const root = await mkdtemp(join(tmpdir(), "kairos-delegate-appr-"));
     const tasks = new TaskStore({ path: join(root, "tasks.sqlite") });

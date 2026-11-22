@@ -29,6 +29,7 @@ describe("config", () => {
     expect(config.runtime.port).toBe(8099);
     expect(config.runtime.kvCacheType).toBe("q8_0");
     expect(config.logging.level).toBe("info");
+    expect(config.paths.tasksDb).toBe("data/tasks.sqlite");
   });
 
   it("o defaultConfig passa pelo schema", () => {
@@ -42,6 +43,7 @@ describe("config", () => {
       KAIROS_PERSONALITY_RUNTIME_KV_CACHE_TYPE: "f16",
       KAIROS_PERSONALITY_LOGGING_LEVEL: "debug",
       KAIROS_PERSONALITY_DATA_DIR: "dados-teste",
+      KAIROS_PERSONALITY_TASKS_DB: "dados-teste/tasks.sqlite",
     });
 
     expect(config.runtime.port).toBe(9090);
@@ -49,6 +51,7 @@ describe("config", () => {
     expect(config.runtime.kvCacheType).toBe("f16");
     expect(config.logging.level).toBe("debug");
     expect(config.paths.dataDir).toBe("dados-teste");
+    expect(config.paths.tasksDb).toBe("dados-teste/tasks.sqlite");
   });
 
   it("recusa host fora do loopback citando o campo", () => {

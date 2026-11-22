@@ -39,6 +39,7 @@ export const configSchema = z.object({
     dataDir: pathSchema,
     secretsDir: pathSchema,
     modelsDir: pathSchema,
+    tasksDb: pathSchema,
   }),
 });
 
@@ -63,6 +64,7 @@ export const defaultConfig: Config = {
     dataDir: "data",
     secretsDir: "secrets",
     modelsDir: "models",
+    tasksDb: "data/tasks.sqlite",
   },
 };
 
@@ -85,6 +87,7 @@ type RawConfig = {
     dataDir: unknown;
     secretsDir: unknown;
     modelsDir: unknown;
+    tasksDb: unknown;
   };
 };
 
@@ -154,6 +157,9 @@ function applyEnv(
         break;
       case "KAIROS_PERSONALITY_MODELS_DIR":
         next.paths.modelsDir = value;
+        break;
+      case "KAIROS_PERSONALITY_TASKS_DB":
+        next.paths.tasksDb = value;
         break;
       default:
         throw new ConfigError([
