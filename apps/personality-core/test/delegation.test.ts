@@ -275,6 +275,27 @@ describe("delegate", () => {
     }
   });
 
+  it("cancel aceito pela invocação ativa usa fala conservadora", async () => {
+    const root = await mkdtemp(join(tmpdir(), "kairos-delegate-cancel2-"));
+    const tasks = new TaskStore({ path: join(root, "tasks.sqlite") });
+    const delegate = createDelegate({
+      client: fakeClient({ async cancel() { return { accepted: true, cancelled: true, trace }; } }),
+      tasks,
+      delegations: setup().delegations,
+      workspace: "f2-unit",
+      log: { info() {} },
+    });
+
+    try {
+      const result = await delegate.cancel(trace);
+      expect(result.status).toBe("cancel_sent");
+      expect(result.speech).toContain("quer que eu confira");
+    } finally {
+      tasks.close();
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("valida slots diretamente com motivo", () => {
     const entry = setup().delegations.entries[0];
     if (entry === undefined) throw new Error("entry ausente");

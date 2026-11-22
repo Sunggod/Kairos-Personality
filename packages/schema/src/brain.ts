@@ -18,6 +18,10 @@ export const brainRequestEnvelopeSchema = brainEnvelopeSchema.extend({
   kind: z.literal("request"),
   cap: z.string().min(1),
   acceptLang: z.string().min(1).optional(),
+  idempotencyKey: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/, "idempotencyKey deve ser SHA-256")
+    .optional(),
   schemaVersion: z.literal(BRAIN_REPORT_SCHEMA_VERSION),
   payload: z.record(z.string(), z.unknown()),
 });

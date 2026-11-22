@@ -8,6 +8,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@kairos-personality/core": "workspace:*",
     "@kairos-personality/schema": "workspace:*",
     "zod": "4.6.7"
   }

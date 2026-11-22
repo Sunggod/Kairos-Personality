@@ -62,6 +62,9 @@ export const UNKNOWN_SPEECH =
 
 export const CANCEL_UNAVAILABLE_SPEECH = "não consegui cancelar";
 
+export const CANCEL_SENT_SPEECH =
+  "Enviei o cancelamento e o nó foi interrompido, mas o Brain pode ter reportado sucesso; quer que eu confira?";
+
 export function conservativeSpeech(outcome: AggregatedOutcome | "unknown"): string {
   if (outcome === "unknown") return UNKNOWN_SPEECH;
   return outcome === "failed"

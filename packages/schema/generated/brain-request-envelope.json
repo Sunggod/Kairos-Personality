@@ -35,6 +35,10 @@
       "type": "string",
       "minLength": 1
     },
+    "idempotencyKey": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "schemaVersion": {
       "type": "string",
       "const": "1.0"

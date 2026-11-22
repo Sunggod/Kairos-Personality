@@ -13,6 +13,7 @@ import {
 import { intentKey } from "./intentions";
 import {
   aggregate,
+  CANCEL_SENT_SPEECH,
   CANCEL_UNAVAILABLE_SPEECH,
   UNKNOWN_SPEECH,
   type AggregatedResult,
@@ -79,7 +80,14 @@ export interface DelegateInput {
 }
 
 export interface DelegateOutcome {
-  readonly status: "executed" | "awaiting-approval" | "unknown" | "deduped" | "blocked" | "not_cancelled";
+  readonly status:
+    | "executed"
+    | "awaiting-approval"
+    | "unknown"
+    | "deduped"
+    | "blocked"
+    | "not_cancelled"
+    | "cancel_sent";
   readonly trace: string;
   readonly intentKey: string;
   readonly reason?: string;
@@ -161,6 +169,7 @@ export function createDelegate(deps: DelegateDeps) {
           flow: input.flow,
           slots: input.slots,
           acceptLang: entry.lang,
+          idempotencyKey: key,
         });
 
         if (result.status === "awaiting-approval") {
@@ -206,9 +215,10 @@ export function createDelegate(deps: DelegateDeps) {
       try {
         await deps.client.cancel(trace);
         return {
-          status: "executed",
+          status: "cancel_sent",
           trace,
           intentKey: "",
+          speech: CANCEL_SENT_SPEECH,
         };
       } catch (error) {
         if (error instanceof BrainTransportError && error.code === "CANCELLED") {

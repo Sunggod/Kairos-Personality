@@ -42,6 +42,7 @@ export interface PlanRunInput {
   readonly flow: string;
   readonly slots: Readonly<Record<string, unknown>>;
   readonly acceptLang?: string;
+  readonly idempotencyKey?: string;
 }
 
 export interface ApprovalFromUi {
@@ -126,6 +127,9 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
         kind: "request",
         cap: "plan.run",
         ...(input.acceptLang !== undefined ? { acceptLang: input.acceptLang } : {}),
+        ...(input.idempotencyKey !== undefined
+          ? { idempotencyKey: input.idempotencyKey }
+          : {}),
         schemaVersion: "1.0",
         payload: { workspace: input.workspace, flow: input.flow, ...input.slots },
       });

@@ -15,6 +15,9 @@
     "test": "bun test",
     "verify:runtime-pins": "bun scripts/verify-runtime-pins.ts",
     "check:delegations": "bun scripts/check-delegations.ts",
+    "e2e:plan-run-happy-path": "bun scripts/e2e-plan-run-happy-path.ts",
+    "e2e:cancel-during-plan-run": "bun scripts/e2e-cancel-during-plan-run.ts",
+    "e2e:stream-buffer-256": "bun scripts/e2e-stream-buffer-256.ts",
     "check": "bun run typecheck && bun test"
   },
   "devDependencies": {
