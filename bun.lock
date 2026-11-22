@@ -18,6 +18,7 @@
       "name": "@kairos-personality/core",
       "version": "0.1.0",
       "dependencies": {
+        "@kairos-personality/schema": "workspace:*",
         "pino": "10.4.0",
         "zod": "4.6.7",
       },
@@ -33,6 +34,7 @@
       "name": "@kairos-personality/scripts",
       "version": "0.1.0",
       "dependencies": {
+        "@kairos-personality/core": "workspace:*",
         "@kairos-personality/schema": "workspace:*",
         "zod": "4.6.7",
       },
