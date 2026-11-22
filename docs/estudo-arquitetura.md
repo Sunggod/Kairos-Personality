@@ -107,6 +107,13 @@ Leitura de `http/server.ts`, `planning/engine.ts`, `planning/approval.ts`, `plan
 
 **Verificado por leitura nesta rodada (nov/2026):** `invocation/service.ts` (705 linhas) e `invocation/stream.ts` (165 linhas) lidos por inteiro — cancel (B14) e buffer de 256 eventos (B15). **Ainda não verificado:** `planning/executor.ts` (timeouts de passo, que não são os timeouts de invocação de nó do `service.ts`) e `docs/architecture.md` §§ de aprovação. Ver §11.2.
 
+> **Revisão — 2026-11-22 — [Decidido durante a implementação]** (B11, B12, B14, B15, R19, ADR-F)
+> **O que mudou:** a forma do B14 está **refutada por execução**. Com `kind: cancel` enviado enquanto a invocação do nó está ativa, o cancel é **aceito (200)**, o nó registra o cancelamento e o `plan.run` termina `executed` com Report `succeeded` sintetizado pelo Brain — não há 409 e o plano não é interrompido limpo. Um segundo cancel também é aceito. Os demais fatos foram **confirmados por execução**: B11 (502 `SCHEMA_MISMATCH` sem Report quando um passo devolve Report inválido), B12 (`idempotencyKey` enviada no envelope do plano **não** chega ao passo) e B15 (300 eventos emitidos pelo nó, 256 retidos no buffer, primeiro evento com índice 45 ⇒ 45 descartados).
+> **Evidência:** `bun run e2e:plan-run-happy-path`, `bun run e2e:cancel-during-plan-run` e `bun run e2e:stream-buffer-256`, cada um com `bun run start` do Brain como processo filho, SQLite em `:memory:` e o nó falso de `packages/conformance/fixtures/node-fake`. B11: sondagem com `invalidReportField: "outcome"` no mesmo harness. Resultados em `docs/status.md`, registro de gate da F2.
+> **Alternativas descartadas:** continuar com a fala "não consegui cancelar" para todos os casos (mentira: o cancel foi aceito e o nó foi interrompido); afirmar que o plano foi cancelado (mentira: terminou `executed`); expor `dropped` por uma rota nova no Brain (exigiria mudança no outro repositório).
+> **Consequência:** a fala de cancelamento é conservadora quando o cancel é aceito ("enviei o cancelamento... quer que eu confira?"), e "não consegui cancelar" fica só para o 409. A barreira local de deduplicação (P11) continua necessária porque B12 foi confirmado. Nenhuma mudança no Brain é necessária para a v1; ADR-F permanece candidato para cancelar um `plan.run` de verdade.
+> **Fase(s) afetada(s):** F2 (E2Es e fala de cancelamento), F4 (`delegate`).
+
 ---
 
 ## 4. Invariantes da Personality [Proposta]
@@ -927,10 +934,12 @@ As seis perguntas originais foram respondidas pela leitura de `apps/brain/src` (
 
 **Ainda não verificado — 2 de 4 resolvidos nesta rodada (B14 e B15 por leitura de código, nov/2026):**
 
-1. ~~`invocation/service.ts` por inteiro: o que um `kind: cancel` faz com um `plan.run` em andamento (B14).~~ **Resolvido por leitura:** o cancel não aborta `plan.run` (409 e o plano segue). Ver B14 e ADR-F. Falta executar o E2E.
+1. ~~`invocation/service.ts` por inteiro: o que um `kind: cancel` faz com um `plan.run` em andamento (B14).~~ **Resolvido por leitura:** o cancel não aborta `plan.run` (409 e o plano segue). Ver B14 e ADR-F. **Executado em 2026-11-22:** refutado na forma — cancel aceito (200) alcança a invocação ativa do nó; o plano termina `executed`. Ver nota em §3.1 e o gate da F2.
 2. ~~`invocation/stream.ts`: o buffer de 256 eventos por `trace` (B15).~~ **Confirmado:** `maxBufferedEvents ?? 256`, descarte do mais antigo com contador `dropped`, assinante tardio recebe o buffer. Ver B15.
 3. As seções de aprovação em `docs/architecture.md`, `docs/onboarding.md` e os ADRs existentes.
-4. Que o gate da F2 (E2E de cancelamento e de falha parcial) passa de verdade: tudo em §3.1 é leitura, e **nenhum teste foi executado**.
+4. Que o gate da F2 (E2E de cancelamento e de falha parcial) passa de verdade: tudo em §3.1 é leitura, e **nenhum teste foi executado**. **Executado em 2026-11-22:** os três E2Es rodaram contra o Brain real e passaram; B11 foi confirmado com um Report inválido no meio do plano. Ver nota em §3.1.
+
+**Confirmado por execução em 2026-11-22 (F2):** B11 (502 sem Report → `unknown`), B12 (`idempotencyKey` não propagada), B14 (**refutado na forma**: cancel aceito alcança a invocação ativa do nó), B15 (256 de 300 eventos retidos, 45 descartados). Detalhes, comandos e saídas no registro de gate da F2 em `docs/status.md`. A aprovação (B6–B9) segue confirmada só por leitura; nenhum fluxo do Brain foi alterado.
 
 ### 11.3 ADRs candidatos no Brain
 

@@ -256,7 +256,10 @@ A skill `phase-runner` detalha; o miolo é:
 - O Brain **não propaga `idempotencyKey`** aos passos (B12): a deduplicação é só local (P11).
 - `approver` é string livre sem autenticação (B8): P2 depende inteiramente daqui.
 - `kind: cancel` **não aborta** um `plan.run` em andamento (B14): a fala é "não consegui
-  cancelar".
+  cancelar". **Execução da F2 (2026-11-22):** com invocação de nó ativa o cancel é aceito (200)
+  e interrompe o nó, mas o `plan.run` termina `executed` com Report sintetizado — nesse caso a
+  fala é conservadora ("enviei o cancelamento... quer que eu confira?"); "não consegui
+  cancelar" fica para o 409. Ver §3.1 do estudo.
 - Buffer de stream de 256 eventos por `trace` (B15): `dropped` é o sinal de que caiu evento.
 - O planner LLM do Brain não está ligado (B4): só fluxos nomeados funcionam; mandar só
   `objective` falha.
