@@ -54,6 +54,23 @@ describe("boot", () => {
     expect(boot["service"]).toBe("personality-core");
   });
 
+  it("sobe em máquina limpa, criando o diretório do SQLite de tarefas", async () => {
+    const root = await mkdtemp(join(tmpdir(), "kairos-boot-clean-"));
+    const dbPath = join(root, "ainda-nao-existe", "tasks.sqlite");
+
+    try {
+      const result = spawnSync(process.execPath, [mainPath], {
+        encoding: "utf8",
+        env: cleanEnv({ KAIROS_PERSONALITY_TASKS_DB: dbPath }),
+      });
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('"event":"tasks.recovered","count":0');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("no boot, tarefa running de processo morto vira unknown", async () => {
     const root = await mkdtemp(join(tmpdir(), "kairos-boot-recovery-"));
     const dbPath = join(root, "tasks.sqlite");

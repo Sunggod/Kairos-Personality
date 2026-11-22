@@ -1,3 +1,5 @@
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 import { Database } from "bun:sqlite";
 import {
   intentionRecordSchema,
@@ -29,6 +31,9 @@ export class TaskStore {
   readonly #schemaVersion: number;
 
   constructor(options: TaskStoreOptions) {
+    if (options.path !== ":memory:") {
+      mkdirSync(dirname(options.path), { recursive: true });
+    }
     this.#db = new Database(options.path);
     this.#now = options.now ?? (() => new Date().toISOString());
     this.#db.exec(`
