@@ -4,18 +4,18 @@ Andamento, handoff e registro de gate. **O roadmap é a especificação e não �
 registrar andamento; este arquivo é.** Todo agente lê isto primeiro e atualiza ao terminar a
 sessão.
 
-Atualizado em: 2026-11-21 · por: agente de implementação (F1 fechada)
+Atualizado em: 2026-11-22 · por: agente de implementação (F2 fechada)
 
 ---
 
 ## Onde estamos
 
-- **Fase em curso:** nenhuma. **F1 Contrato interno fechada** com gate verde em 2026-11-21;
-  F0 permanece verde e pinada.
-- **Próxima ação:** **F2 (cliente do Brain) só depois da liberação do responsável** — exige o
-  Brain rodando de verdade para B14/B15/B11/B12. Em paralelo: **S5** (modelo) antes da F4;
-  S1/S2/S6 antes da F5.
-- **Bloqueado por:** liberação para abrir a F2. Pendências 1 e 3 só antes da F6a e da F6c.
+- **Fase em curso:** nenhuma. **F2 Cliente do Brain fechada** com gate verde em 2026-11-22;
+  F0 e F1 permanecem verdes.
+- **Próxima ação:** abrir a **F3 (emoção, persona e memória)**, começando por `affect.step`
+  com vetores; em paralelo, **S5** (modelo) antes da F4 e S1/S2/S6 antes da F5.
+- **Bloqueado por:** nada para a F3. Pendências 1 e 3 só antes da F6a e da F6c; ADR-F segue
+  candidato no Brain para cancelar um `plan.run` de verdade.
 
 ---
 
@@ -71,7 +71,7 @@ Estado: `não iniciado` · `em curso` · `concluído` (relatório em `docs/spike
 |---|---|---|---|---|
 | F0 Fundação | concluída | verde | 901119b | 2026-11-21 |
 | F1 Contrato interno | concluída | verde | 9df5d13 | 2026-11-21 |
-| F2 Cliente do Brain | não iniciada | — | — | — |
+| F2 Cliente do Brain | concluída | verde | d48666f | 2026-11-22 |
 | F3 Emoção, persona e memória | não iniciada | — | — | — |
 | F4 LLM e delegação | não iniciada | — | — | — |
 | F5 Voz | não iniciada | — | — | — |
@@ -128,6 +128,27 @@ modelo abaixo.
 - Desvios do estudo ou do Fluxo: nenhum. Extensões locais justificadas: gerador passou a escrever em `packages/schema/generated/` (exigido pelo comando do CI); `.gitignore` de `data/` para `/data/` para versionar `packages/schema/data/`; `check:delegations` lê também `.yml`/`.json`, como o README do Brain declara, sempre sem escrita. Nenhuma nota de estudo foi necessária: as decisões tomadas eram internas e foram registradas em `AGENTS.md` §9 e aqui
 - Itens que não foram verificados: F2 não foi iniciada (B11/B12/B14/B15 contra o Brain real ficam para lá); migração de dado existente (não houve); julgamento humano de persona (S8) e demais spikes
 
+### F2 — Cliente do Brain — 2026-11-22
+
+- Commit: d48666f (entregas em 6866e15, f8ea9a7, 2d2039f, a8f6c20, 7a298d9, c653c4c, d3cc13a, cf33cab, d48666f)   Máquina: piso   Build pinado: inalterado (`runtime.lock.json` / `models.lock.json`)
+- bun install && bunx tsc --noEmit && bun test: 65 testes em 14 arquivos, 447 asserções, 0 falhas; `tsc --noEmit` exit 0
+- Comandos do gate da fase:
+    bun test: 65 pass, 0 fail
+    bun run e2e:plan-run-happy-path: `executed`, 2 passos, B12 confirmado (`idempotencyKey` não propagada aos passos), exit 0
+    bun run e2e:cancel-during-plan-run: cancel aceito (200) alcançou o nó, `plan.run` terminou `executed/succeeded`, B14 refutado na forma do estudo, exit 0
+    bun run e2e:stream-buffer-256: 300 eventos emitidos, 256 retidos, índice inicial 45, exit 0
+    bunx tsc --noEmit: exit 0
+    bun run gen:schema && git diff --exit-code packages/schema/generated: diff vazio
+- O que o Brain **realmente** fez (contra `bun run start` + nó falso do próprio Brain, SQLite `:memory:`):
+    **B11** — Report inválido no meio do plano devolveu HTTP 502 `SCHEMA_MISMATCH`, sem Report; o `delegate` mapeia para `unknown` com fala conservadora
+    **B12** — a `idempotencyKey` foi enviada no envelope do `plan.run` e **não** apareceu nas duas requisições de passo; deduplicação continua local (P11)
+    **B14** — cancel enviado durante a invocação ativa do nó foi **aceito (200)**, o nó registrou o cancelamento e o `plan.run` terminou `executed` com Report `succeeded` sintetizado; o segundo cancel também foi aceito. Forma do estudo (409 e plano segue) **refutada por execução**; fala conservadora no código, "não consegui cancelar" reservado para 409
+    **B15** — 300 eventos emitidos pelo nó, 256 retidos no buffer de 256 por `trace`, primeiro evento com índice 45 ⇒ 45 descartados; `dropped` não é exposto por RPC e foi inferido do buffer via `/stream` tardio
+- Medições (se houver): nenhuma — F2 é protocolo e comportamento, não orçamento
+- Itens manuais registrados: três E2Es com Brain real como processo filho, derrubado ao fim (nenhum listener em 4317); `git status` do Brain limpo em todas as rodadas; revisão independente em duas rodadas encontrou 9 achados (2 altos: P2 forgeável e `trace` como PK), todos fechados com novos vetores e os E2Es reexecutados; boot real recupera `running`/`awaiting-approval` para `unknown` sem reenvio, provado por teste com SQLite em arquivo
+- Desvios do estudo ou do Fluxo: nenhum desvio do Fluxo. Nota de revisão datada em `docs/estudo-arquitetura.md` §3.1/§11.2 e `AGENTS.md` §13 por B14 refutado; pendência da F1 (filtro M2/M3) registrada em D14 como `[Decidido durante a implementação]`
+- Itens que não foram verificados: aprovação B6–B9 contra o Brain real (nenhum fluxo do Brain foi alterado; teste cobre cliente + store); concorrência real de SQLite entre `delegate`s paralelos; latência/volume além de 300 eventos; `dropped` lido diretamente do `StreamHub` (não há rota RPC); jitter de rede; os próprios testes E2E não rodam no CI (exigem o Brain local)
+
 ---
 
 ## Decisões tomadas durante a implementação
@@ -135,6 +156,7 @@ modelo abaixo.
 Índice das notas `[Decidido durante a implementação]` no estudo: data, seção, uma linha.
 
 - 2026-11-21 · D14 — filtro M2/M3 fail-closed: qualquer sequência de 10/11 dígitos é tratada como PII; trade-off de falso positivo registrado com 22 vetores de bypass. (pendência da F1)
+- 2026-11-22 · §3.1/§11.2 — B11, B12 e B15 confirmados e B14 refutado na forma por execução contra o Brain real; fala de cancelamento conservadora quando o cancel é aceito.
 
 ---
 
@@ -162,6 +184,19 @@ Mais recente primeiro. Cada sessão termina com uma entrada.
 - Próxima ação: <uma frase>
 - Perguntas ao responsável: <lista ou "nenhuma">
 ```
+
+### 2026-11-22 — agente de implementação (F2)
+- Feito: F2 fechada e publicada em nove commits (6866e15, f8ea9a7, 2d2039f, a8f6c20,
+  7a298d9, c653c4c, d3cc13a, cf33cab, d48666f): contrato Zod do cliente, cliente HTTP+SSE,
+  tarefas em SQLite com recuperação no boot, intenção/dedup P11, agregação do pior resultado
+  e B11, `delegate` com Zod e três E2Es reais. Gate com 65 testes e os três E2Es verdes; CI
+  verde. B11/B12/B15 confirmados e B14 refutado na forma, registrados no estudo e no AGENTS.
+- Ficou pendente: F3 não foi iniciada; S5 (modelo) segue antes da F4; ADR-F permanece
+  candidato no Brain (não alterado); aprovação real B6–B9 e concorrência SQLite não medidas;
+  revisões v3.1/v3.2 seguem sem homologação (só antes da F6a).
+- Próxima ação: abrir a F3 com `affect.step` e vetores, usando `contract-first`.
+- Perguntas ao responsável: nenhuma para a F3; ADR-F e a homologação das revisões seguem
+  na fila do responsável.
 
 ### 2026-11-21 — agente de implementação (F1)
 - Feito: F1 fechada e publicada em treze commits (04e8e6b, 07f4a26, 984610d, 8a6971d,
