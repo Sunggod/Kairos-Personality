@@ -1,7 +1,10 @@
 import {
+  approvalDecisionSchema,
+  approvalResultSchema,
   BRAIN_PROTOCOL_VERSION,
   brainCancelEnvelopeSchema,
   brainRequestEnvelopeSchema,
+  cancelResultSchema,
   planRunResultSchema,
   rpcResponseSchema,
   streamEventEnvelopeSchema,
@@ -45,14 +48,25 @@ export interface PlanRunInput {
   readonly idempotencyKey?: string;
 }
 
+const UI_APPROVAL_TOKEN = Symbol("kairos.ui-approval");
+
+/** Símbolo que dado JSON (inclusive saída do LLM) não consegue fabricar (P2). */
+export interface UiApprovalToken {
+  readonly [UI_APPROVAL_TOKEN]: true;
+}
+
+export function createUiApprovalToken(): UiApprovalToken {
+  return { [UI_APPROVAL_TOKEN]: true };
+}
+
 export interface ApprovalFromUi {
-  readonly source: "ui";
   readonly approvalId: string;
   readonly decision: "approved" | "denied";
-  readonly approver: string;
   readonly workspace: string;
   readonly trace: string;
 }
+
+export const UI_APPROVER = "user:local/ui";
 
 export interface StreamHandle {
   close(): void;
@@ -61,11 +75,15 @@ export interface StreamHandle {
 
 export interface BrainClient {
   planRun(input: PlanRunInput): Promise<PlanRunResult>;
-  decideApproval(event: ApprovalFromUi): Promise<Record<string, unknown>>;
+  decideApproval(
+    event: ApprovalFromUi,
+    token: UiApprovalToken,
+  ): Promise<Record<string, unknown>>;
   cancel(trace: string): Promise<Record<string, unknown>>;
   stream(options: {
     trace: string;
     onEvent: (event: StreamEventEnvelope) => void;
+    onDiscarded?: (reason: string) => void;
   }): Promise<StreamHandle>;
 }
 
@@ -95,7 +113,15 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
       body: JSON.stringify(envelope),
     });
 
-    const raw: unknown = await response.json();
+    let raw: unknown;
+    try {
+      raw = await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new BrainContractError("corpo da resposta não é JSON");
+      }
+      throw error;
+    }
 
     const parsed = rpcResponseSchema.safeParse(raw);
     if (!parsed.success) {
@@ -142,10 +168,16 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
       return checked.data;
     },
 
-    async decideApproval(event) {
-      // P2/B8: o canal de aprovação é determinístico e vem da UI, nunca do LLM.
-      if (event.source !== "ui") {
+    async decideApproval(event, token) {
+      // P2/B8: nem o chamador nem dado do Brain escolhem o approver.
+      // O token com símbolo privado só pode vir da camada de UI.
+      if (token === null || typeof token !== "object" || !(UI_APPROVAL_TOKEN in token)) {
         throw new BrainContractError("aprovação só pode vir da UI (P2)");
+      }
+
+      const parsedDecision = approvalDecisionSchema.safeParse(event.decision);
+      if (!parsedDecision.success) {
+        throw new BrainContractError("decisão de aprovação inválida");
       }
 
       const envelope = brainRequestEnvelopeSchema.parse({
@@ -160,13 +192,17 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
         payload: {
           workspace: event.workspace,
           approvalId: event.approvalId,
-          decision: event.decision,
-          approver: event.approver,
+          decision: parsedDecision.data,
+          approver: UI_APPROVER,
         },
       });
 
       const result = await rpc(envelope);
-      return result as Record<string, unknown>;
+      const checked = approvalResultSchema.safeParse(result);
+      if (!checked.success) {
+        throw new BrainContractError(issuePaths(checked.error));
+      }
+      return checked.data;
     },
 
     async cancel(trace) {
@@ -182,7 +218,11 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
       });
 
       const result = await rpc(envelope);
-      return result as Record<string, unknown>;
+      const checked = cancelResultSchema.safeParse(result);
+      if (!checked.success) {
+        throw new BrainContractError(issuePaths(checked.error));
+      }
+      return checked.data;
     },
 
     async stream(options) {
@@ -220,9 +260,17 @@ export function createBrainClient(options: BrainClientOptions): BrainClient {
                 .join("\n");
               separator = buffer.indexOf("\n\n");
               if (data.length === 0 || data.startsWith("[")) continue;
-              const raw: unknown = JSON.parse(data);
-              const parsed = streamEventEnvelopeSchema.safeParse(raw);
-              if (parsed.success) options.onEvent(parsed.data);
+              try {
+                const raw: unknown = JSON.parse(data);
+                const parsed = streamEventEnvelopeSchema.safeParse(raw);
+                if (parsed.success) {
+                  options.onEvent(parsed.data);
+                } else if (options.onDiscarded !== undefined) {
+                  options.onDiscarded("evento fora do contrato: " + issuePaths(parsed.error));
+                }
+              } catch {
+                options.onDiscarded?.("evento com JSON inválido");
+              }
             }
           }
         } finally {

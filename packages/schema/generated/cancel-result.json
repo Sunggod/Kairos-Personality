@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "accepted": {
+      "type": "boolean"
+    },
+    "cancelled": {
+      "type": "boolean"
+    },
+    "trace": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    }
+  },
+  "required": [
+    "accepted"
+  ],
+  "additionalProperties": {},
+  "$id": "https://kairos-personality.local/schema/cancel-result.json",
+  "title": "Kairos Brain cancel Result"
+}

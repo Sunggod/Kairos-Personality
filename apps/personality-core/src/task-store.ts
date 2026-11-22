@@ -44,14 +44,20 @@ export class TaskStore {
         created_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS tasks (
-        trace TEXT PRIMARY KEY,
+        trace TEXT NOT NULL,
         task_id TEXT NOT NULL,
         flow TEXT NOT NULL,
         state TEXT NOT NULL,
         intent_key TEXT NOT NULL,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
-        outcome TEXT
+        outcome TEXT,
+        PRIMARY KEY (trace, task_id)
+      );
+      CREATE TABLE IF NOT EXISTS approvals (
+        approval_id TEXT PRIMARY KEY,
+        trace TEXT NOT NULL,
+        created_at TEXT NOT NULL
       );
       INSERT OR IGNORE INTO meta (key, value) VALUES ('schemaVersion', '1');
     `);
@@ -71,6 +77,27 @@ export class TaskStore {
       .query("SELECT intent_key FROM intentions WHERE intent_key = ?")
       .get(intentKey);
     return row !== null;
+  }
+
+  /** P11: libera a intenção apenas para um retry autorizado pela UI. */
+  releaseIntention(intentKey: string): void {
+    this.#db.query("DELETE FROM intentions WHERE intent_key = ?").run(intentKey);
+  }
+
+  hasApproval(approvalId: string): boolean {
+    const row = this.#db
+      .query("SELECT approval_id FROM approvals WHERE approval_id = ?")
+      .get(approvalId);
+    return row !== null;
+  }
+
+  /** Registra que o pedido de aprovação foi entregue ao canal da UI. */
+  recordApproval(approvalId: string, trace: string): void {
+    this.#db
+      .query(
+        "INSERT OR IGNORE INTO approvals (approval_id, trace, created_at) VALUES (?, ?, ?)",
+      )
+      .run(approvalId, trace, this.#now());
   }
 
   /** Persiste a intenção ANTES de qualquer plan.run (P11). */
@@ -136,10 +163,10 @@ export class TaskStore {
     return record;
   }
 
-  get(trace: string): TaskRecord | null {
+  get(trace: string, taskId: string): TaskRecord | null {
     const row = this.#db
-      .query("SELECT * FROM tasks WHERE trace = ?")
-      .get(trace) as TaskRow | null;
+      .query("SELECT * FROM tasks WHERE trace = ? AND task_id = ?")
+      .get(trace, taskId) as TaskRow | null;
     return row === null ? null : this.#toRecord(row);
   }
 
@@ -164,22 +191,27 @@ export class TaskStore {
     });
   }
 
-  setState(trace: string, state: StoredTaskState, outcome?: string): void {
+  setState(
+    trace: string,
+    taskId: string,
+    state: StoredTaskState,
+    outcome?: string,
+  ): void {
     const at = this.#now();
     this.#db
       .query(
-        "UPDATE tasks SET state = ?, outcome = ?, updated_at = ? WHERE trace = ?",
+        "UPDATE tasks SET state = ?, outcome = ?, updated_at = ? WHERE trace = ? AND task_id = ?",
       )
-      .run(state, outcome ?? null, at, trace);
+      .run(state, outcome ?? null, at, trace, taskId);
   }
 
   /**
-   * Chamado no boot: toda tarefa que estava `running` quando o processo morreu
-   * passa a `unknown`. Não há reenvio: este método não fala com o Brain.
+   * Chamado no boot: toda tarefa em estado não terminal (`running` ou
+   * `awaiting-approval`) passa a `unknown`. Não há reenvio.
    */
-  recoverRunning(): TaskRecord[] {
+  recoverNonTerminal(): TaskRecord[] {
     const rows = this.#db
-      .query("SELECT * FROM tasks WHERE state = 'running'")
+      .query("SELECT * FROM tasks WHERE state IN ('running', 'awaiting-approval')")
       .all() as TaskRow[];
     const recovered: TaskRecord[] = [];
     const at = this.#now();
@@ -187,8 +219,10 @@ export class TaskStore {
     const tx = this.#db.transaction(() => {
       for (const row of rows) {
         this.#db
-          .query("UPDATE tasks SET state = 'unknown', updated_at = ? WHERE trace = ?")
-          .run(at, row.trace);
+          .query(
+            "UPDATE tasks SET state = 'unknown', updated_at = ? WHERE trace = ? AND task_id = ?",
+          )
+          .run(at, row.trace, row.task_id);
         recovered.push(
           taskRecordSchema.parse({
             schemaVersion: this.#schemaVersion,

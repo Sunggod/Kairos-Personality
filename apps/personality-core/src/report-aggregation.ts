@@ -3,20 +3,31 @@ import { brainReportSchema, type BrainReport, type PlanRunResult } from "@kairos
 export type AggregatedOutcome = "succeeded" | "partial" | "failed" | "aborted";
 
 const RANK: Readonly<Record<AggregatedOutcome, number>> = {
-  aborted: 0,
   succeeded: 1,
-  partial: 2,
-  failed: 3,
+  aborted: 2,
+  partial: 3,
+  failed: 4,
 };
 
 /** D2/B10: o pior outcome entre todos os results[].report, não só o report final. */
-export function worstOutcome(reports: readonly BrainReport[]): AggregatedOutcome {
-  let worst: AggregatedOutcome = "succeeded";
+export function worstOutcome(
+  reports: readonly BrainReport[],
+  extra: readonly AggregatedOutcome[] = [],
+): AggregatedOutcome {
+  const first = reports[0];
+  let worst: AggregatedOutcome =
+    first === undefined ? "succeeded" : brainReportSchema.parse(first).outcome;
 
   for (const candidate of reports) {
     const parsed = brainReportSchema.parse(candidate);
     if (RANK[parsed.outcome] > RANK[worst]) {
       worst = parsed.outcome;
+    }
+  }
+
+  for (const outcome of extra) {
+    if (RANK[outcome] > RANK[worst]) {
+      worst = outcome;
     }
   }
 
@@ -49,8 +60,10 @@ export function aggregate(result: PlanRunResult): AggregatedResult {
     throw new Error("plano executado sem nenhum Report para agregar");
   }
 
+  const failedSteps = result.results.filter((step) => !step.ok).length;
+
   return {
-    outcome: worstOutcome(all),
+    outcome: worstOutcome(all, failedSteps > 0 ? ["failed"] : []),
     report,
     steps: result.results.length,
     reportsRead: all.length,
@@ -69,7 +82,9 @@ export function conservativeSpeech(outcome: AggregatedOutcome | "unknown"): stri
   if (outcome === "unknown") return UNKNOWN_SPEECH;
   return outcome === "failed"
     ? "Não consegui terminar. Quer que eu tente de outro jeito?"
-    : outcome === "partial"
+    : outcome === "aborted"
+      ? "A ação foi interrompida; quer que eu retome ou mude o caminho?"
+      : outcome === "partial"
       ? "Fiz parte do que era pedido; o que ficou de fora está nas ressalvas."
       : "Pronto.";
 }

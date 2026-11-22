@@ -120,6 +120,17 @@ export const planRunResultSchema = z.looseObject({
 
 export const approvalDecisionSchema = z.enum(["approved", "denied"]);
 
+export const approvalResultSchema = z.looseObject({
+  status: z.string().min(1),
+  approval: approvalRecordSchema.optional(),
+});
+
+export const cancelResultSchema = z.looseObject({
+  accepted: z.boolean(),
+  cancelled: z.boolean().optional(),
+  trace: traceSchema.optional(),
+});
+
 export const streamEventEnvelopeSchema = z.looseObject({
   proto: z.literal(BRAIN_PROTOCOL_VERSION),
   id: z.string().min(1),

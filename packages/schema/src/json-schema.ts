@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { affectStateSchema } from "./affect";
 import {
+  approvalResultSchema,
   brainReportSchema,
   brainRequestEnvelopeSchema,
+  cancelResultSchema,
   planRunResultSchema,
 } from "./brain";
 import {
@@ -99,6 +101,16 @@ export const jsonSchemas = {
     planRunResultSchema,
     "Kairos Brain plan.run Result",
     "https://kairos-personality.local/schema/plan-run-result.json",
+  ),
+  "approval-result": toSchema(
+    approvalResultSchema,
+    "Kairos Brain approval.decide Result",
+    "https://kairos-personality.local/schema/approval-result.json",
+  ),
+  "cancel-result": toSchema(
+    cancelResultSchema,
+    "Kairos Brain cancel Result",
+    "https://kairos-personality.local/schema/cancel-result.json",
   ),
   "task-record": toSchema(
     taskRecordSchema,

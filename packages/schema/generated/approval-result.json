@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workspace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "step": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "requestedAt": {
+          "type": "number"
+        },
+        "expiresAt": {
+          "type": "number"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        },
+        "approver": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "trace",
+        "workspace",
+        "step",
+        "reason",
+        "requestedAt",
+        "expiresAt"
+      ],
+      "additionalProperties": {}
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "additionalProperties": {},
+  "$id": "https://kairos-personality.local/schema/approval-result.json",
+  "title": "Kairos Brain approval.decide Result"
+}

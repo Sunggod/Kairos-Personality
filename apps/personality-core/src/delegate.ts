@@ -9,6 +9,7 @@ import {
   BrainTransportError,
   type ApprovalFromUi,
   type BrainClient,
+  type UiApprovalToken,
 } from "./brain-client";
 import { intentKey } from "./intentions";
 import {
@@ -154,9 +155,10 @@ export function createDelegate(deps: DelegateDeps) {
       }
 
       // P11: intenção e tarefa gravadas ANTES do plan.run.
+      const taskId = "tsk_" + key.slice(0, 12);
       deps.tasks.begin({
         trace: input.trace,
-        taskId: "tsk_" + key.slice(0, 12),
+        taskId,
         flow: input.flow,
         intentKey: key,
         slots: JSON.stringify(input.slots),
@@ -173,7 +175,10 @@ export function createDelegate(deps: DelegateDeps) {
         });
 
         if (result.status === "awaiting-approval") {
-          deps.tasks.setState(input.trace, "awaiting-approval");
+          deps.tasks.setState(input.trace, taskId, "awaiting-approval");
+          if (result.approval !== undefined) {
+            deps.tasks.recordApproval(result.approval.id, input.trace);
+          }
           return {
             status: "awaiting-approval",
             trace: input.trace,
@@ -183,7 +188,7 @@ export function createDelegate(deps: DelegateDeps) {
         }
 
         const aggregated = aggregate(result);
-        deps.tasks.setState(input.trace, "executed", aggregated.outcome);
+        deps.tasks.setState(input.trace, taskId, "executed", aggregated.outcome);
 
         return {
           status: "executed",
@@ -194,7 +199,7 @@ export function createDelegate(deps: DelegateDeps) {
       } catch (error) {
         if (error instanceof BrainTransportError && error.status === 502) {
           // B11: 502 sem Report não é "falhou limpo".
-          deps.tasks.setState(input.trace, "unknown");
+          deps.tasks.setState(input.trace, taskId, "unknown");
           return {
             status: "unknown",
             trace: input.trace,
@@ -207,13 +212,30 @@ export function createDelegate(deps: DelegateDeps) {
       }
     },
 
-    async approve(event: ApprovalFromUi): Promise<Record<string, unknown>> {
-      return deps.client.decideApproval(event);
+    async approve(
+      event: ApprovalFromUi,
+      token: UiApprovalToken,
+    ): Promise<Record<string, unknown>> {
+      if (!deps.tasks.hasApproval(event.approvalId)) {
+        throw new DelegateError(
+          "approval_not_delivered",
+          "aprovação não foi entregue à UI neste processo",
+        );
+      }
+      return deps.client.decideApproval(event, token);
     },
 
     async cancel(trace: string): Promise<DelegateOutcome> {
       try {
-        await deps.client.cancel(trace);
+        const result = await deps.client.cancel(trace);
+        if (result.accepted !== true || result.cancelled === false) {
+          return {
+            status: "not_cancelled",
+            trace,
+            intentKey: "",
+            speech: CANCEL_UNAVAILABLE_SPEECH,
+          };
+        }
         return {
           status: "cancel_sent",
           trace,

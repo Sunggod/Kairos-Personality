@@ -13,9 +13,16 @@ function canonical(value: unknown): Json {
   if (typeof value === "object") {
     const source = value as Record<string, unknown>;
     const keys = Object.keys(source).sort();
-    const result: Record<string, Json> = {};
+    // Object.create(null) + defineProperty impede que chaves como `__proto__`
+    // alterem o prototype e desapareçam da serialização (chave de intenção fiel).
+    const result = Object.create(null) as Record<string, Json>;
     for (const key of keys) {
-      result[key] = canonical(source[key]);
+      Object.defineProperty(result, key, {
+        value: canonical(source[key]),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
     return result;
   }

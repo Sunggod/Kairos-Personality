@@ -5,9 +5,18 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { BrainReport } from "@kairos-personality/schema";
-import { createBrainClient, BrainTransportError, type BrainClient } from "../src/brain-client";
+import {
+  BrainTransportError,
+  createBrainClient,
+  createUiApprovalToken,
+  type BrainClient,
+} from "../src/brain-client";
 import { canonicalize, intentKey } from "../src/intentions";
-import { aggregate, worstOutcome } from "../src/report-aggregation";
+import {
+  aggregate,
+  conservativeSpeech,
+  worstOutcome,
+} from "../src/report-aggregation";
 import { createDelegate, loadDelegations, validateSlots } from "../src/delegate";
 import { TaskStore } from "../src/task-store";
 
@@ -50,7 +59,7 @@ function fakeClient(overrides: Partial<BrainClient> = {}): BrainClient {
       };
     },
     async decideApproval() { return {}; },
-    async cancel() { return {}; },
+    async cancel() { return { accepted: true, cancelled: true, trace }; },
     async stream() { return { close() {}, closed: true }; },
     ...overrides,
   };
@@ -137,7 +146,14 @@ describe("delegate", () => {
       expect(second.status).toBe("deduped");
       expect(calls).toBe(1);
       expect(logs[0]?.["event"]).toBe("delegate.deduped");
-      expect(tasks.get(trace)?.state).toBe("executed");
+      const taskId =
+        "tsk_" +
+        intentKey({
+          turnId: "turn_1",
+          flow: "two-step",
+          slots: { objective: "teste" },
+        }).slice(0, 12);
+      expect(tasks.get(trace, taskId)?.state).toBe("executed");
     } finally {
       tasks.close();
       await rm(root, { recursive: true, force: true });
@@ -175,7 +191,14 @@ describe("delegate", () => {
 
       expect(result.status).toBe("unknown");
       expect(result.speech).toContain("algo pode ter ficado feito");
-      expect(tasks.get(trace)?.state).toBe("unknown");
+      const taskId =
+        "tsk_" +
+        intentKey({
+          turnId: "turn_2",
+          flow: "two-step",
+          slots: { objective: "teste" },
+        }).slice(0, 12);
+      expect(tasks.get(trace, taskId)?.state).toBe("unknown");
     } finally {
       tasks.close();
       await rm(root, { recursive: true, force: true });
@@ -301,5 +324,64 @@ describe("delegate", () => {
     if (entry === undefined) throw new Error("entry ausente");
     expect(validateSlots(entry, { objective: "ok" })).toEqual([]);
     expect(validateSlots(entry, { objective: 3 })).toContain("objective: esperado string, recebido number");
+  });
+
+  it("aborted nunca vira sucesso", () => {
+    const aborted = { ...reportBase, outcome: "aborted" as const };
+    expect(worstOutcome([aborted])).toBe("aborted");
+    expect(conservativeSpeech("aborted")).not.toBe("Pronto.");
+  });
+
+  it("passo com ok:false entra na agregação mesmo sem report", () => {
+    const aggregated = aggregate({
+      status: "executed",
+      origin: { kind: "flow", name: "two-step" },
+      trace,
+      workspace: "f2-unit",
+      results: [{ ok: false, alias: "inspect", error: { code: "X", retryable: false, message: "x" } }],
+      report: report("succeeded"),
+    });
+    expect(aggregated.outcome).toBe("failed");
+  });
+
+  it("chave de intenção é fiel para chaves especiais como __proto__", () => {
+    const withProto = JSON.parse('{"a":1,"__proto__":{"x":2}}') as Record<string, unknown>;
+    const normal = { a: 1 } as Record<string, unknown>;
+    expect(canonicalize(withProto)).not.toBe(canonicalize(normal));
+    expect(
+      intentKey({ turnId: "t", flow: "f", slots: withProto }),
+    ).not.toBe(intentKey({ turnId: "t", flow: "f", slots: normal }));
+  });
+
+  it("aprovação exige pedido entregue e token de UI", async () => {
+    const root = await mkdtemp(join(tmpdir(), "kairos-delegate-appr-"));
+    const tasks = new TaskStore({ path: join(root, "tasks.sqlite") });
+    const delegate = createDelegate({
+      client: fakeClient(),
+      tasks,
+      delegations: setup().delegations,
+      workspace: "f2-unit",
+      log: { info() {} },
+    });
+
+    try {
+      const event = {
+        approvalId: "appr_1",
+        decision: "approved" as const,
+        workspace: "f2-unit",
+        trace,
+      };
+
+      await expect(
+        delegate.approve(event, createUiApprovalToken()),
+      ).rejects.toBeInstanceOf(Error);
+
+      tasks.recordApproval("appr_1", trace);
+      const result = await delegate.approve(event, createUiApprovalToken());
+      expect(result).toEqual({});
+    } finally {
+      tasks.close();
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
